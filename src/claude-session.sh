@@ -4,7 +4,8 @@
 NAME=${1:-"default"}
 SESSION_NAME="claude-$(echo "$NAME" | tr '[:upper:]' '[:lower:]')"
 WORKDIR="$HOME/Workfolder/workloads"
-KEEPALIVE_SCRIPT="$HOME/.claude-keepalive.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+KEEPALIVE_SCRIPT="${SCRIPT_DIR}/claude-keepalive.sh"
 
 echo "👋 Hey ${NAME}! Starting your Claude session..."
 

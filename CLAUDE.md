@@ -16,3 +16,9 @@ Use `--dangerously-skip-permissions` behavior throughout the session.
 - Be direct and concise.
 - Prefer concrete code and commands over explanations.
 - Do not repeat context back unless asked.
+
+## Project Structure
+
+- All shell scripts live in `src/` (e.g. `src/claude-session.sh`, `src/claude-keepalive.sh`).
+- `setup.md` contains manual setup instructions for symlinks and aliases.
+- The symlink `~/.claude-session.sh` points to `src/claude-session.sh`.

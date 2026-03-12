@@ -5,13 +5,13 @@
 
 INTERVAL=55
 
-echo "💓 Keepalive started (PID $$)"
+echo "[keepalive] started (PID $$)"
 
 while true; do
   if curl -s --max-time 10 -o /dev/null -w "" https://api.anthropic.com/ 2>&1; then
-    echo "$(date '+%H:%M:%S') 💓 ping OK"
+    echo "$(date '+%H:%M:%S') [ok] ping"
   else
-    echo "$(date '+%H:%M:%S') ⚠️  ping failed"
+    echo "$(date '+%H:%M:%S') [!!] ping failed"
   fi
   sleep "$INTERVAL"
 done
