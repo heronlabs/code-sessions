@@ -1,42 +1,17 @@
 #!/bin/bash
 
-# Remote Access Monitor
-# Starts Claude remote access and restarts it if it stops
+# Keepalive — pings Anthropic API every 55s to prevent connection drops
 # Runs in its own tmux window — do not kill manually
 
-LOG="/tmp/claude-remote.log"
-CHECK_INTERVAL=120  # seconds between health checks
+INTERVAL=55
 
-start_remote() {
-  echo "$(date '+%H:%M:%S') 📡 Starting Claude remote access..." | tee -a "$LOG"
-  claude remote start >> "$LOG" 2>&1 &
-  echo $! > /tmp/claude-remote.pid
-  sleep 3
-}
-
-is_remote_running() {
-  # Check if the remote process is alive
-  if [ -f /tmp/claude-remote.pid ]; then
-    local pid
-    pid=$(cat /tmp/claude-remote.pid)
-    if kill -0 "$pid" 2>/dev/null; then
-      return 0  # running
-    fi
-  fi
-  # Fallback: check by process name
-  pgrep -f "claude remote" > /dev/null 2>&1
-}
-
-echo "🔍 Remote monitor started (PID $$)" | tee "$LOG"
-start_remote
+echo "💓 Keepalive started (PID $$)"
 
 while true; do
-  sleep "$CHECK_INTERVAL"
-
-  if is_remote_running; then
-    echo "$(date '+%H:%M:%S') ✅ Remote access OK" | tee -a "$LOG"
+  if curl -s --max-time 10 -o /dev/null -w "" https://api.anthropic.com/ 2>&1; then
+    echo "$(date '+%H:%M:%S') 💓 ping OK"
   else
-    echo "$(date '+%H:%M:%S') ⚠️  Remote access down — restarting..." | tee -a "$LOG"
-    start_remote
+    echo "$(date '+%H:%M:%S') ⚠️  ping failed"
   fi
+  sleep "$INTERVAL"
 done

@@ -5,7 +5,6 @@ NAME=${1:-"default"}
 SESSION_NAME="claude-$(echo "$NAME" | tr '[:upper:]' '[:lower:]')"
 WORKDIR="$HOME/Workfolder/workloads"
 KEEPALIVE_SCRIPT="$HOME/.claude-keepalive.sh"
-REMOTE_MONITOR_SCRIPT="$HOME/.claude-remote-monitor.sh"
 
 echo "👋 Hey ${NAME}! Starting your Claude session..."
 
@@ -30,20 +29,18 @@ else
   tmux set-option -t "$SESSION_NAME" status-left-length 40
   tmux set-option -t "$SESSION_NAME" status-left "#[fg=green]#{session_name} "
 
-  # Window: keepalive (pings Anthropic API to maintain connection)
-  tmux new-window -t "$SESSION_NAME" -n "keepalive"
-  tmux send-keys -t "${SESSION_NAME}:keepalive" "bash ${KEEPALIVE_SCRIPT}" Enter
+  # Split right: keepalive (pings Anthropic API to maintain connection)
+  tmux split-window -h -t "$SESSION_NAME" -p 50
+  tmux send-keys -t "$SESSION_NAME" "bash ${KEEPALIVE_SCRIPT}" Enter
 
-  # Window: remote-monitor (watches and restarts remote access if it drops)
-  tmux new-window -t "$SESSION_NAME" -n "remote"
-  tmux send-keys -t "${SESSION_NAME}:remote" "bash ${REMOTE_MONITOR_SCRIPT}" Enter
-
-  # Back to main window
-  tmux select-window -t "${SESSION_NAME}:claude-${NAME}"
+  # Focus back to main (left) pane and launch Claude
+  tmux select-pane -t "$SESSION_NAME".0
   tmux send-keys -t "$SESSION_NAME" "cd ${WORKDIR}" Enter
-
-  # Launch Claude interactive session with auto-approve
   tmux send-keys -t "$SESSION_NAME" "claude --dangerously-skip-permissions" Enter
+
+  # Wait for Claude to initialize, then send /remote-control
+  sleep 5
+  tmux send-keys -t "${SESSION_NAME}.0" "/remote-control" Enter
 
   tmux attach -t "$SESSION_NAME"
 fi
