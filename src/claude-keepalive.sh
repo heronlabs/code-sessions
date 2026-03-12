@@ -8,7 +8,8 @@ INTERVAL=55
 echo "[keepalive] started (PID $$)"
 
 while true; do
-  if curl -s --max-time 10 -o /dev/null -w "" https://api.anthropic.com/ 2>&1; then
+  HTTP_CODE=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" https://api.anthropic.com/ 2>/dev/null)
+  if [ "$HTTP_CODE" -gt 0 ] 2>/dev/null; then
     echo "$(date '+%H:%M:%S') [ok] ping"
   else
     echo "$(date '+%H:%M:%S') [!!] ping failed"

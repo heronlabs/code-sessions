@@ -11,16 +11,17 @@ Edit the scripts there and the links pick up changes automatically.
 
 ```bash
 ln -sf ~/Workfolder/claude-sessions/src/claude-session.sh ~/.claude-session.sh
+ln -sf ~/Workfolder/claude-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
 chmod +x ~/Workfolder/claude-sessions/src/*.sh
 ```
 
-Verify the link is correct:
+Verify the links are correct:
 
 ```bash
-ls -la ~/.claude-session.sh
+ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
 ```
 
-You should see `-> ~/Workfolder/claude-sessions/src/...` next to the file.
+You should see `-> ~/Workfolder/claude-sessions/src/...` next to each file.
 
 ---
 
