@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: session-wake-up [name]
+# Usage: session-start [name]
 NAME=${1:-"default"}
 SESSION_NAME="claude-$(echo "$NAME" | tr '[:upper:]' '[:lower:]')"
 WORKDIR="$HOME/Workfolder/workloads"
