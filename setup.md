@@ -87,14 +87,14 @@ Open `~/.zshrc` and add this block manually:
 
 ```zsh
 # Claude session management
-alias wake-up="~/.claude-session.sh"
+alias session-wake-up="~/.claude-session.sh"
 
-claude-resume() {
+session-resume() {
   local name="${1:-default}"
   tmux attach -t "claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
 }
 
-claude-stop() {
+session-stop() {
   local name="${1:-default}"
   local session="claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
   tmux kill-session -t "$session" 2>/dev/null
@@ -118,7 +118,7 @@ source ~/.zshrc
 ## 7. Verify everything works
 
 ```bash
-wake-up steve
+session-wake-up steve
 ```
 
 Once inside tmux you'll see 2 panes:
@@ -130,10 +130,10 @@ Once inside tmux you'll see 2 panes:
 # Press Ctrl+B, then D
 
 # Resume from another terminal or after opening lid:
-claude-resume steve
+session-resume steve
 
 # Stop everything cleanly:
-claude-stop steve
+session-stop steve
 ```
 
 ---
@@ -182,5 +182,5 @@ Primary:   claude remote (from Claude app / iPhone)
 Fallback:  Tailscale SSH → Termius → tmux attach -t claude-steve → manual control
 ```
 
-> No LaunchAgent needed. After a full reboot, run `wake-up steve` again.
+> No LaunchAgent needed. After a full reboot, run `session-wake-up steve` again.
 > To update any script, edit it in `~/Workfolder/claude-sessions/src/` — no re-linking needed.
