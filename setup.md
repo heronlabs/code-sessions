@@ -87,14 +87,14 @@ Open `~/.zshrc` and add this block manually:
 
 ```zsh
 # Claude session management
-alias session-start="~/.claude-session.sh"
+alias start-remote-session="~/.claude-session.sh"
 
-session-resume() {
+resume-remote-session() {
   local name="${1:-default}"
   tmux attach -t "claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
 }
 
-session-stop() {
+stop-remote-session() {
   local name="${1:-default}"
   local session="claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
   tmux kill-session -t "$session" 2>/dev/null
@@ -118,7 +118,7 @@ source ~/.zshrc
 ## 7. Verify everything works
 
 ```bash
-session-start steve
+start-remote-session steve
 ```
 
 Once inside tmux you'll see 2 panes:
@@ -130,10 +130,10 @@ Once inside tmux you'll see 2 panes:
 # Press Ctrl+B, then D
 
 # Resume from another terminal or after opening lid:
-session-resume steve
+resume-remote-session steve
 
 # Stop everything cleanly:
-session-stop steve
+stop-remote-session steve
 ```
 
 ---
@@ -182,5 +182,5 @@ Primary:   claude remote (from Claude app / iPhone)
 Fallback:  Tailscale SSH → Termius → tmux attach -t claude-steve → manual control
 ```
 
-> No LaunchAgent needed. After a full reboot, run `session-start steve` again.
+> No LaunchAgent needed. After a full reboot, run `start-remote-session steve` again.
 > To update any script, edit it in `~/Workfolder/claude-sessions/src/` — no re-linking needed.

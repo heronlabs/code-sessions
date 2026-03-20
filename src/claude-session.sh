@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: session-start [name]
+# Usage: start-remote-session [name]
 NAME=${1:-"default"}
 SESSION_NAME="claude-$(echo "$NAME" | tr '[:upper:]' '[:lower:]')"
 WORKDIR="$HOME/Workfolder/workloads"
