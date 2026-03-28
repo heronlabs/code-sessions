@@ -87,16 +87,16 @@ Open `~/.zshrc` and add this block manually:
 
 ```zsh
 # Claude session management
-alias start-remote-session="~/.claude-session.sh"
+alias start-s="~/.claude-session.sh"
 
-resume-remote-session() {
-  local name="${1:-default}"
-  tmux attach -t "claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
+resume-s() {
+  if [ -z "$1" ]; then echo "Usage: resume-s <folder>"; return 1; fi
+  tmux attach -t "claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
 }
 
-stop-remote-session() {
-  local name="${1:-default}"
-  local session="claude-$(echo "$name" | tr '[:upper:]' '[:lower:]')"
+stop-s() {
+  if [ -z "$1" ]; then echo "Usage: stop-s <folder>"; return 1; fi
+  local session="claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
   tmux kill-session -t "$session" 2>/dev/null
   if [ -f /tmp/claude-caffeinate.pid ]; then
     kill "$(cat /tmp/claude-caffeinate.pid)" 2>/dev/null
@@ -118,22 +118,22 @@ source ~/.zshrc
 ## 7. Verify everything works
 
 ```bash
-start-remote-session steve
+start-s workloads
 ```
 
 Once inside tmux you'll see 2 panes:
-- Left (75%): your interactive Claude session
-- Right (25%): keepalive ping loop
+- Top (10%): keepalive ping loop
+- Bottom (90%): your interactive Claude session (in `~/Workfolder/workloads`)
 
 ```bash
 # Detach from tmux (keeps everything running):
 # Press Ctrl+B, then D
 
 # Resume from another terminal or after opening lid:
-resume-remote-session steve
+resume-s workloads
 
 # Stop everything cleanly:
-stop-remote-session steve
+stop-s workloads
 ```
 
 ---
