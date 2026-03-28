@@ -52,13 +52,13 @@ Or use the IP directly: `100.x.x.x`
 
 ## 4. Create symbolic links
 
-Instead of copying files, link them so `~/Workfolder/claude-sessions/src/` stays the single source of truth.
+Instead of copying files, link them so `~/Workfolder/code-sessions/src/` stays the single source of truth.
 Edit the scripts there and the links pick up changes automatically.
 
 ```bash
-ln -sf ~/Workfolder/claude-sessions/src/claude-session.sh ~/.claude-session.sh
-ln -sf ~/Workfolder/claude-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
-chmod +x ~/Workfolder/claude-sessions/src/*.sh
+ln -sf ~/Workfolder/code-sessions/src/claude-session.sh ~/.claude-session.sh
+ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
+chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
 
 Verify the links are correct:
@@ -66,14 +66,14 @@ Verify the links are correct:
 ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
 ```
 
-You should see `-> ~/Workfolder/claude-sessions/src/...` next to each file.
+You should see `-> ~/Workfolder/code-sessions/src/...` next to each file.
 
 ---
 
 ## 5. Copy CLAUDE.md to your workdir
 
 ```bash
-cp ~/Workfolder/claude-sessions/CLAUDE.md ~/Workfolder/workloads/CLAUDE.md
+cp ~/Workfolder/code-sessions/CLAUDE.md ~/Workfolder/workloads/CLAUDE.md
 ```
 
 > This one is a copy, not a symlink — Claude reads it from the workdir at runtime.
@@ -183,4 +183,4 @@ Fallback:  Tailscale SSH → Termius → tmux attach -t claude-steve → manual 
 ```
 
 > No LaunchAgent needed. After a full reboot, run `start-remote-session steve` again.
-> To update any script, edit it in `~/Workfolder/claude-sessions/src/` — no re-linking needed.
+> To update any script, edit it in `~/Workfolder/code-sessions/src/` — no re-linking needed.

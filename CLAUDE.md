@@ -16,8 +16,8 @@ A toolkit for running persistent Claude Code sessions via tmux, with remote acce
 
 Scripts are symlinked from `src/` to `~/`:
 ```
-~/.claude-session.sh  ->  ~/Workfolder/claude-sessions/src/claude-session.sh
-~/.claude-keepalive.sh -> ~/Workfolder/claude-sessions/src/claude-keepalive.sh
+~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
+~/.claude-keepalive.sh -> ~/Workfolder/code-sessions/src/claude-keepalive.sh
 ```
 
 Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The argument is a folder name under `~/Workfolder/` (e.g., `start-s workloads` runs Claude in `~/Workfolder/workloads`).
