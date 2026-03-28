@@ -54,7 +54,7 @@ else
 
   # Right: uptime │ memory │ date & time
   tmux set-option -t "$SESSION_NAME" status-right-length 120
-  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #[fg=#e0af68] #(echo \$((\$(date +%%s)-#{session_created})) | awk '{h=int(\$1/3600);m=int((\$1%%3600)/60);printf \"%%dh %%02dm\",h,m}') #[fg=#3b4261]│ #[fg=#9ece6a] #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
+  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #[fg=#e0af68] Uptime: #(echo \$((\$(date +%%s)-#{session_created})) | awk '{h=int(\$1/3600);m=int((\$1%%3600)/60);printf \"%%dh %%02dm\",h,m}') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
 
   # Window tabs — hide to avoid duplicating session name
   tmux set-option -t "$SESSION_NAME" window-status-format ""
