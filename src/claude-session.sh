@@ -70,8 +70,8 @@ else
   # Pane 0 starts as the full window — launch keepalive here
   tmux send-keys -t "$SESSION_NAME" "bash ${KEEPALIVE_SCRIPT}" Enter
 
-  # Split vertically: pane 0 stays on top (10%), pane 1 = Claude on bottom (90%)
-  tmux split-window -v -t "${SESSION_NAME}.0" -p 90
+  # Split vertically: pane 0 stays on top (5%), pane 1 = Claude on bottom (95%)
+  tmux split-window -v -t "${SESSION_NAME}.0" -p 95
 
   # Split top pane horizontally: pane 0 = keepalive (20%), new pane = shell (80%)
   # After this split, panes are: 0=keepalive (top-left), 1=shell (top-right), 2=claude (bottom)
@@ -97,6 +97,10 @@ else
   tmux select-pane -t "${SESSION_NAME}.2" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"
   tmux set-option -p -t "${SESSION_NAME}.2" pane-border-style "fg=#7aa2f7"
   tmux set-option -p -t "${SESSION_NAME}.2" pane-active-border-style "fg=#7aa2f7,bold"
+
+  # Force top row to 5% height
+  tmux resize-pane -t "${SESSION_NAME}.0" -y 5%
+  tmux resize-pane -t "${SESSION_NAME}.1" -y 5%
 
   # Focus the Claude pane
   tmux select-pane -t "${SESSION_NAME}.2"
