@@ -53,8 +53,8 @@ else
   tmux set-option -t "$SESSION_NAME" status-left "#[bg=#7aa2f7,fg=#1a1b26,bold]  #S #[bg=#1a1b26,fg=#7aa2f7]"
 
   # Right: uptime │ memory │ date & time
-  tmux set-option -t "$SESSION_NAME" status-right-length 120
-  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #[fg=#e0af68] Uptime: #(echo \$((\$(date +%%s)-#{session_created})) | awk '{h=int(\$1/3600);m=int((\$1%%3600)/60);printf \"%%dh %%02dm\",h,m}') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
+  tmux set-option -t "$SESSION_NAME" status-right-length 140
+  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
 
   # Window tabs — show named windows in status bar
   tmux set-option -t "$SESSION_NAME" window-status-format " #[fg=#a9b1d6]#I:#W "
@@ -67,37 +67,31 @@ else
   tmux set-option -t "$SESSION_NAME" pane-border-style "fg=#3b4261"
   tmux set-option -t "$SESSION_NAME" pane-active-border-style "fg=#7aa2f7"
 
-  # Window 0: tools (keepalive + shell side by side)
-  tmux rename-window -t "${SESSION_NAME}:0" "tools"
+  # Start keepalive as background process (status shown in status bar)
+  bash "${KEEPALIVE_SCRIPT}" &
+  echo $! > /tmp/claude-keepalive.pid
 
-  # Pane 0 starts as full window — launch keepalive here
-  tmux send-keys -t "$SESSION_NAME" "bash ${KEEPALIVE_SCRIPT}" Enter
+  # Single window: claude (top 90%) + shell (bottom 10%)
+  tmux rename-window -t "${SESSION_NAME}:0" "session"
 
-  # Split horizontally: keepalive (left 20%), shell (right 80%)
-  tmux split-window -h -t "${SESSION_NAME}.0" -p 80
-  tmux send-keys -t "${SESSION_NAME}.1" "cd ${WORKDIR}" Enter
+  # Pane 0: launch Claude
+  tmux send-keys -t "${SESSION_NAME}.0" "cd ${WORKDIR} && claude --dangerously-skip-permissions --remote-control" Enter
 
-  # Color keepalive pane — amber
-  tmux select-pane -t "${SESSION_NAME}.0" -T "#[fg=#e0af68]⏱ keepalive" -P "bg=#1c1a16"
-  tmux set-option -p -t "${SESSION_NAME}.0" pane-border-style "fg=#e0af68"
-  tmux set-option -p -t "${SESSION_NAME}.0" pane-active-border-style "fg=#e0af68"
+  # Split vertically: Claude (top 90%), shell (bottom 10%)
+  tmux split-window -v -t "${SESSION_NAME}.0" -p 10 -c "$WORKDIR"
+
+  # Color Claude pane — blue
+  tmux select-pane -t "${SESSION_NAME}.0" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"
+  tmux set-option -p -t "${SESSION_NAME}.0" pane-border-style "fg=#7aa2f7"
+  tmux set-option -p -t "${SESSION_NAME}.0" pane-active-border-style "fg=#7aa2f7,bold"
 
   # Color shell pane — green
   tmux select-pane -t "${SESSION_NAME}.1" -T "#[fg=#9ece6a]⬢ shell" -P "bg=#1a1c16"
   tmux set-option -p -t "${SESSION_NAME}.1" pane-border-style "fg=#9ece6a"
   tmux set-option -p -t "${SESSION_NAME}.1" pane-active-border-style "fg=#9ece6a"
 
-  # Window 1: claude (full screen)
-  tmux new-window -t "$SESSION_NAME" -n "claude" -c "$WORKDIR"
-  tmux send-keys -t "${SESSION_NAME}:claude" "claude --dangerously-skip-permissions --remote-control" Enter
-
-  # Color claude pane — blue
-  tmux select-pane -t "${SESSION_NAME}:claude.0" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"
-  tmux set-option -p -t "${SESSION_NAME}:claude.0" pane-border-style "fg=#7aa2f7"
-  tmux set-option -p -t "${SESSION_NAME}:claude.0" pane-active-border-style "fg=#7aa2f7,bold"
-
-  # Focus the claude window
-  tmux select-window -t "${SESSION_NAME}:claude"
+  # Focus the Claude pane
+  tmux select-pane -t "${SESSION_NAME}.0"
 
   tmux attach -t "$SESSION_NAME"
 fi
