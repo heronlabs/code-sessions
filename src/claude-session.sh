@@ -75,7 +75,7 @@ else
   tmux rename-window -t "${SESSION_NAME}:0" "session"
 
   # Pane 0: launch Claude
-  tmux send-keys -t "${SESSION_NAME}.0" "cd ${WORKDIR} && claude --dangerously-skip-permissions --remote-control" Enter
+  tmux send-keys -t "${SESSION_NAME}.0" "cd ${WORKDIR} && claude --dangerously-skip-permissions --remote-control ${SESSION_NAME}" Enter
 
   # Color Claude pane — blue
   tmux select-pane -t "${SESSION_NAME}.0" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"
