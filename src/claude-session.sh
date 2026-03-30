@@ -71,27 +71,16 @@ else
   bash "${KEEPALIVE_SCRIPT}" &
   echo $! > /tmp/claude-keepalive.pid
 
-  # Single window: claude (top 90%) + shell (bottom 10%)
+  # Single window: Claude (full screen)
   tmux rename-window -t "${SESSION_NAME}:0" "session"
 
   # Pane 0: launch Claude
   tmux send-keys -t "${SESSION_NAME}.0" "cd ${WORKDIR} && claude --dangerously-skip-permissions --remote-control" Enter
 
-  # Split vertically: Claude (top 90%), shell (bottom 10%)
-  tmux split-window -v -t "${SESSION_NAME}.0" -p 10 -c "$WORKDIR"
-
   # Color Claude pane — blue
   tmux select-pane -t "${SESSION_NAME}.0" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"
   tmux set-option -p -t "${SESSION_NAME}.0" pane-border-style "fg=#7aa2f7"
   tmux set-option -p -t "${SESSION_NAME}.0" pane-active-border-style "fg=#7aa2f7,bold"
-
-  # Color shell pane — green
-  tmux select-pane -t "${SESSION_NAME}.1" -T "#[fg=#9ece6a]⬢ shell" -P "bg=#1a1c16"
-  tmux set-option -p -t "${SESSION_NAME}.1" pane-border-style "fg=#9ece6a"
-  tmux set-option -p -t "${SESSION_NAME}.1" pane-active-border-style "fg=#9ece6a"
-
-  # Focus the Claude pane
-  tmux select-pane -t "${SESSION_NAME}.0"
 
   tmux attach -t "$SESSION_NAME"
 fi

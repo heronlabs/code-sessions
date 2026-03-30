@@ -8,8 +8,8 @@ A toolkit for running persistent Claude Code sessions via tmux, with remote acce
 
 ## Repository Structure
 
-- `src/claude-session.sh` — Main session launcher. Creates a tmux session with two panes: keepalive (top, 10%) and Claude interactive (bottom, 90%). Prevents machine sleep via `caffeinate -dims`.
-- `src/claude-keepalive.sh` — Pings `api.anthropic.com` every 55s to prevent connection drops. Runs in its own tmux pane.
+- `src/claude-session.sh` — Main session launcher. Creates a tmux session with a single full-screen pane running Claude interactive. Prevents machine sleep via `caffeinate -dims`. Use `/spawn-terminal` inside Claude to toggle an on-demand shell pane (30% bottom split).
+- `src/claude-keepalive.sh` — Pings `api.anthropic.com` every 55s to prevent connection drops. Runs as a background process.
 - `README.md` — Full manual setup guide (symlinks, aliases, Tailscale, Termius).
 
 ## Setup
