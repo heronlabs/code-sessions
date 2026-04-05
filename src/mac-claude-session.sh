@@ -27,15 +27,15 @@ else
 
   # Prevent sleep — works with lid closed, no GUI dependency
   caffeinate -dims &
-  echo $! > /tmp/claude-caffeinate-${NAME}.pid
+  echo "$!" > "/tmp/claude-caffeinate-${NAME}.pid"
 
   # Track session start time for statusline uptime
-  date +%s > /tmp/claude_session_start_${NAME}
+  date +%s > "/tmp/claude_session_start_${NAME}"
 
   # ── Keepalive — pings Anthropic API every 55s to prevent connection drops ──
   (
     KEEPALIVE_INTERVAL=55
-    KEEPALIVE_STATUS="/tmp/claude-keepalive-status"
+    KEEPALIVE_STATUS="/tmp/claude-keepalive-status-${NAME}"
     while true; do
       HTTP_CODE=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" https://api.anthropic.com/ 2>/dev/null)
       if [ "$HTTP_CODE" -gt 0 ] 2>/dev/null; then
@@ -46,7 +46,7 @@ else
       sleep "$KEEPALIVE_INTERVAL"
     done
   ) &
-  echo $! > /tmp/claude-keepalive-${NAME}.pid
+  echo "$!" > "/tmp/claude-keepalive-${NAME}.pid"
 
   # Create main tmux session
   tmux new-session -d -s "$SESSION_NAME" -x 220 -y 50
@@ -68,7 +68,7 @@ else
 
   # Right: uptime │ memory │ date & time
   tmux set-option -t "$SESSION_NAME" status-right-length 140
-  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
+  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status-${NAME} 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
 
   # Window tabs — show named windows in status bar
   tmux set-option -t "$SESSION_NAME" window-status-format " #[fg=#a9b1d6]#I:#W "
@@ -85,7 +85,7 @@ else
   tmux rename-window -t "${SESSION_NAME}:0" "session"
 
   # Pane 0: launch Claude
-  tmux send-keys -t "${SESSION_NAME}.0" "cd ${WORKDIR} && claude --dangerously-skip-permissions --remote-control" Enter
+  tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions --remote-control" Enter
 
   # Color Claude pane — blue
   tmux select-pane -t "${SESSION_NAME}.0" -T "#[fg=#7aa2f7]◆ claude" -P "bg=#16181e"

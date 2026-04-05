@@ -96,6 +96,7 @@ All session scripts support running multiple projects in parallel. Each session 
 - tmux session (`claude-frontend`, `claude-backend`, etc.)
 - Sleep inhibitor PID file (`/tmp/claude-caffeinate-frontend.pid`)
 - Keepalive PID file (`/tmp/claude-keepalive-frontend.pid`)
+- Keepalive status file (`/tmp/claude-keepalive-status-frontend`)
 - Session start timestamp (`/tmp/claude_session_start_frontend`)
 
 Stopping one session does not affect others:
@@ -154,6 +155,7 @@ stop-s() {
     rm /tmp/claude-keepalive-${name}.pid
   fi
   rm -f /tmp/claude_session_start_${name}
+  rm -f /tmp/claude-keepalive-status-${name}
   echo "Session ${session} stopped."
 }
 
