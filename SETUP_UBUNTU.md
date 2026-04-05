@@ -198,18 +198,17 @@ mkdir -p ~/Workfolder/workloads
 
 ## 10. Create symbolic links
 
-Link the **Ubuntu version** of the session script and the shared keepalive script:
+Link the **Ubuntu version** of the session script:
 
 ```bash
 ln -sf ~/Workfolder/code-sessions/src/ubuntu-claude-session.sh ~/.claude-session.sh
-ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
 chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
 
 Verify:
 
 ```bash
-ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
+ls -la ~/.claude-session.sh
 ```
 
 You should see arrows pointing to the scripts under `~/Workfolder/code-sessions/src/`.

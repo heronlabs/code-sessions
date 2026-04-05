@@ -65,10 +65,9 @@ Tailscale creates a private network between your devices — no port forwarding 
 
 ```
 src/
-├── claude-session.sh           # macOS session launcher
-├── ubuntu-claude-session.sh    # Ubuntu session launcher
-├── windows-claude-session.sh   # Windows (WSL2) session launcher
-└── claude-keepalive.sh         # API keepalive (shared, all platforms)
+├── mac-claude-session.sh       # macOS session launcher (includes keepalive)
+├── ubuntu-claude-session.sh    # Ubuntu session launcher (includes keepalive)
+└── windows-claude-session.sh   # Windows (WSL2) session launcher (includes keepalive)
 
 SETUP_MAC.md                    # Full setup guide for macOS
 SETUP_UBUNTU.md                 # Full setup guide for Ubuntu
@@ -84,7 +83,7 @@ Pick your platform and follow the setup guide:
 
 | Platform | Guide | Session Script |
 |---|---|---|
-| **macOS** | [SETUP_MAC.md](SETUP_MAC.md) | `claude-session.sh` |
+| **macOS** | [SETUP_MAC.md](SETUP_MAC.md) | `mac-claude-session.sh` |
 | **Ubuntu** | [SETUP_UBUNTU.md](SETUP_UBUNTU.md) | `ubuntu-claude-session.sh` |
 | **Windows (WSL2)** | [SETUP_WINDOWS.md](SETUP_WINDOWS.md) | `windows-claude-session.sh` |
 

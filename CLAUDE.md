@@ -8,16 +8,16 @@ A toolkit for running persistent Claude Code sessions via tmux, with remote acce
 
 ## Repository Structure
 
-- `src/claude-session.sh` — Main session launcher. Creates a tmux session with a single full-screen pane running Claude interactive. Prevents machine sleep via `caffeinate -dims`.
-- `src/claude-keepalive.sh` — Pings `api.anthropic.com` every 55s to prevent connection drops. Runs as a background process.
-- `README.md` — Full manual setup guide (symlinks, aliases, Tailscale, Termius).
+- `src/mac-claude-session.sh` — macOS session launcher. Creates a tmux session with Claude interactive, prevents sleep via `caffeinate -dims`, and runs an inline keepalive that pings `api.anthropic.com` every 55s.
+- `src/ubuntu-claude-session.sh` — Ubuntu session launcher. Same as Mac but uses `systemd-inhibit` for sleep prevention and `free -m` for memory.
+- `src/windows-claude-session.sh` — Windows (WSL2) session launcher. Same as Ubuntu but uses `powercfg` for sleep prevention.
+- `README.md` — Workflow overview and setup guide links for all platforms.
 
 ## Setup
 
-Scripts are symlinked from `src/` to `~/`:
+The platform session script is symlinked from `src/` to `~/`:
 ```
-~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
-~/.claude-keepalive.sh -> ~/Workfolder/code-sessions/src/claude-keepalive.sh
+~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/mac-claude-session.sh   # (or ubuntu- or windows-)
 ```
 
 Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The argument is a folder name under `~/Workfolder/` (e.g., `start-s workloads` runs Claude in `~/Workfolder/workloads`).
@@ -25,5 +25,5 @@ Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The a
 ## Key Conventions
 
 - Session names are lowercased and prefixed with `claude-` (e.g., `claude-steve`).
-- `caffeinate` PID is stored at `/tmp/claude-caffeinate.pid` and cleaned up on stop.
-- The keepalive script resolves its path relative to `claude-session.sh` via `SCRIPT_DIR`, so both scripts must stay in the same directory.
+- `caffeinate` PID is stored at `/tmp/claude-caffeinate-<name>.pid` (per session) and cleaned up on stop.
+- The keepalive loop is inlined in each platform's session script — no separate keepalive file needed.

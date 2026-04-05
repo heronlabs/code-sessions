@@ -202,14 +202,13 @@ mkdir -p ~/Workfolder/workloads
 
 ```bash
 ln -sf ~/Workfolder/code-sessions/src/windows-claude-session.sh ~/.claude-session.sh
-ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
 chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
 
 Verify:
 
 ```bash
-ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
+ls -la ~/.claude-session.sh
 ```
 
 ---

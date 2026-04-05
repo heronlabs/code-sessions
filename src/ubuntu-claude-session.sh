@@ -12,8 +12,6 @@ fi
 NAME="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
 SESSION_NAME="claude-${NAME}"
 WORKDIR="$HOME/Workfolder/${1}"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-KEEPALIVE_SCRIPT="${SCRIPT_DIR}/.claude-keepalive.sh"
 
 echo "👋 Starting Claude session '${SESSION_NAME}' in ${WORKDIR}..."
 
@@ -39,6 +37,22 @@ else
 
   # Track session start time for statusline uptime
   date +%s > /tmp/claude_session_start_${NAME}
+
+  # ── Keepalive — pings Anthropic API every 55s to prevent connection drops ──
+  (
+    KEEPALIVE_INTERVAL=55
+    KEEPALIVE_STATUS="/tmp/claude-keepalive-status"
+    while true; do
+      HTTP_CODE=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" https://api.anthropic.com/ 2>/dev/null)
+      if [ "$HTTP_CODE" -gt 0 ] 2>/dev/null; then
+        echo "ok $(date +%s)" > "$KEEPALIVE_STATUS"
+      else
+        echo "fail $(date +%s)" > "$KEEPALIVE_STATUS"
+      fi
+      sleep "$KEEPALIVE_INTERVAL"
+    done
+  ) &
+  echo $! > /tmp/claude-keepalive-${NAME}.pid
 
   # Create main tmux session
   tmux new-session -d -s "$SESSION_NAME" -x 220 -y 50
@@ -72,10 +86,6 @@ else
   tmux set-option -t "$SESSION_NAME" pane-border-format " #{pane_title} "
   tmux set-option -t "$SESSION_NAME" pane-border-style "fg=#3b4261"
   tmux set-option -t "$SESSION_NAME" pane-active-border-style "fg=#7aa2f7"
-
-  # Start keepalive as background process (status shown in status bar)
-  bash "${KEEPALIVE_SCRIPT}" &
-  echo $! > /tmp/claude-keepalive-${NAME}.pid
 
   # Single window: Claude (full screen)
   tmux rename-window -t "${SESSION_NAME}:0" "session"

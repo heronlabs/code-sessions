@@ -67,15 +67,14 @@ mkdir -p ~/Workfolder/workloads
 ## 5. Create symbolic links
 
 ```bash
-ln -sf ~/Workfolder/code-sessions/src/claude-session.sh ~/.claude-session.sh
-ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
+ln -sf ~/Workfolder/code-sessions/src/mac-claude-session.sh ~/.claude-session.sh
 chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
 
 Verify:
 
 ```bash
-ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
+ls -la ~/.claude-session.sh
 ```
 
 You should see arrows pointing to `~/Workfolder/code-sessions/src/...`.
