@@ -142,10 +142,19 @@ curl -fsSL https://tailscale.com/install.sh | sh
 Start and authenticate:
 
 ```bash
-sudo tailscale up
+sudo tailscale up --accept-dns=false --accept-routes=false --netfilter-mode=off
 ```
 
+> **Important:** These flags prevent Tailscale from overriding your system DNS and
+> iptables rules, which can break your wired/Wi-Fi internet on Ubuntu.
+
 Follow the URL in the terminal to authenticate. Confirm your machine appears at https://login.tailscale.com/admin/machines
+
+Persist the flags so they survive reboots (Tailscale's systemd service starts automatically on boot):
+
+```bash
+sudo tailscale set --accept-dns=false --accept-routes=false --netfilter-mode=off
+```
 
 Check your Tailscale IP:
 
