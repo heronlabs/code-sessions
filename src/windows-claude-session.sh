@@ -2,7 +2,7 @@
 
 # Usage: start-s <folder>
 # Starts a Claude session inside ~/Workfolder/<folder>
-# Ubuntu version — uses systemd-inhibit instead of caffeinate
+# Windows (WSL2) version — sleep prevention managed via Windows host
 if [ -z "$1" ]; then
   echo "Usage: start-s <folder>"
   echo "  e.g. start-s workloads"
@@ -15,30 +15,28 @@ WORKDIR="$HOME/Workfolder/${1}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 KEEPALIVE_SCRIPT="${SCRIPT_DIR}/.claude-keepalive.sh"
 
-echo "👋 Starting Claude session '${SESSION_NAME}' in ${WORKDIR}..."
+echo "Starting Claude session '${SESSION_NAME}' in ${WORKDIR}..."
 
 if [ ! -d "$WORKDIR" ]; then
-  echo "⚠️  Folder not found: ${WORKDIR}"
+  echo "Folder not found: ${WORKDIR}"
   exit 1
 fi
 
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-  echo "⚡ Session '${SESSION_NAME}' already running. Resuming..."
+  echo "Session '${SESSION_NAME}' already running. Resuming..."
   tmux attach -t "$SESSION_NAME"
 else
-  echo "🚀 Launching new session for ${NAME} in ${WORKDIR}..."
+  echo "Launching new session for ${NAME} in ${WORKDIR}..."
 
-  # Prevent sleep — Ubuntu equivalent of caffeinate
-  # Uses systemd-inhibit to block idle/sleep/lid-switch
-  systemd-inhibit --what=idle:sleep:handle-lid-switch \
-    --who="claude-session" \
-    --why="Claude coding session active" \
-    --mode=block \
-    sleep infinity &
-  echo $! > /tmp/claude-caffeinate.pid
+  # Prevent Windows host from sleeping — calls powercfg via PowerShell
+  # Creates a temporary power plan that disables sleep (restored on stop-s)
+  if command -v powershell.exe &>/dev/null; then
+    powershell.exe -Command "powercfg /change standby-timeout-ac 0; powercfg /change standby-timeout-dc 0" 2>/dev/null
+    echo "wsl-inhibit" > /tmp/claude-caffeinate-${NAME}.pid
+  fi
 
   # Track session start time for statusline uptime
-  date +%s > /tmp/claude_session_start
+  date +%s > /tmp/claude_session_start_${NAME}
 
   # Create main tmux session
   tmux new-session -d -s "$SESSION_NAME" -x 220 -y 50
@@ -58,9 +56,9 @@ else
   tmux set-option -t "$SESSION_NAME" status-left-length 50
   tmux set-option -t "$SESSION_NAME" status-left "#[bg=#7aa2f7,fg=#1a1b26,bold]  #S #[bg=#1a1b26,fg=#7aa2f7]"
 
-  # Right: uptime │ memory │ date & time (Ubuntu-adapted: uses free instead of memory_pressure)
+  # Right: uptime | memory | date & time (WSL-adapted: uses free for memory)
   tmux set-option -t "$SESSION_NAME" status-right-length 140
-  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(free -m | awk '/Mem:/{printf \"%%d%%%%\", (\$3/\$2)*100}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
+  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]| #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]* Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]* Keepalive\"; else printf \"#[fg=#e0af68]o Keepalive\"; fi') #[fg=#3b4261]| #[fg=#9ece6a] Mem: #(free -m | awk '/Mem:/{printf \"%%d%%%%\", (\$3/\$2)*100}') #[fg=#3b4261]| #[fg=#bb9af7] %a %d %b #[fg=#3b4261]| #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
 
   # Window tabs — show named windows in status bar
   tmux set-option -t "$SESSION_NAME" window-status-format " #[fg=#a9b1d6]#I:#W "
@@ -75,7 +73,7 @@ else
 
   # Start keepalive as background process (status shown in status bar)
   bash "${KEEPALIVE_SCRIPT}" &
-  echo $! > /tmp/claude-keepalive.pid
+  echo $! > /tmp/claude-keepalive-${NAME}.pid
 
   # Single window: Claude (full screen)
   tmux rename-window -t "${SESSION_NAME}:0" "session"

@@ -201,7 +201,7 @@ mkdir -p ~/Workfolder/workloads
 Link the **Ubuntu version** of the session script and the shared keepalive script:
 
 ```bash
-ln -sf ~/Workfolder/code-sessions/src/claude-session-ubuntu.sh ~/.claude-session.sh
+ln -sf ~/Workfolder/code-sessions/src/ubuntu-claude-session.sh ~/.claude-session.sh
 ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
 chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
@@ -229,34 +229,7 @@ cp ~/Workfolder/code-sessions/CLAUDE.md ~/Workfolder/workloads/CLAUDE.md
 
 ## 12. Add aliases to your zshrc
 
-Open `~/.zshrc` and add this block at the bottom:
-
-```zsh
-# Claude session management
-alias start-s="~/.claude-session.sh"
-
-resume-s() {
-  if [ -z "$1" ]; then echo "Usage: resume-s <folder>"; return 1; fi
-  tmux attach -t "claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-}
-
-stop-s() {
-  if [ -z "$1" ]; then echo "Usage: stop-s <folder>"; return 1; fi
-  local session="claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-  tmux kill-session -t "$session" 2>/dev/null
-  if [ -f /tmp/claude-caffeinate.pid ]; then
-    kill "$(cat /tmp/claude-caffeinate.pid)" 2>/dev/null
-    rm /tmp/claude-caffeinate.pid
-  fi
-  if [ -f /tmp/claude-keepalive.pid ]; then
-    kill "$(cat /tmp/claude-keepalive.pid)" 2>/dev/null
-    rm /tmp/claude-keepalive.pid
-  fi
-  echo "Session ${session} stopped."
-}
-
-alias claude-remote-log="tail -f /tmp/claude-remote.log"
-```
+Open `~/.zshrc` and add the alias block from [README.md — Shell Aliases](README.md#shell-aliases-all-platforms).
 
 Reload:
 
@@ -323,7 +296,7 @@ Then in Termius, import the private key (`~/.ssh/id_ed25519`) under **Keychain**
 | SSH server | System Settings toggle | `openssh-server` package |
 | Tailscale install | `brew install --cask tailscale` | `curl` install script |
 | Shell change | Already Zsh on modern macOS | `chsh -s $(which zsh)` |
-| Session script | `claude-session.sh` | `claude-session-ubuntu.sh` |
+| Session script | `claude-session.sh` | `ubuntu-claude-session.sh` |
 
 ---
 

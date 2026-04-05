@@ -2,6 +2,7 @@
 
 # Usage: start-s <folder>
 # Starts a Claude session inside ~/Workfolder/<folder>
+# Ubuntu version — uses systemd-inhibit instead of caffeinate
 if [ -z "$1" ]; then
   echo "Usage: start-s <folder>"
   echo "  e.g. start-s workloads"
@@ -27,8 +28,13 @@ if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
 else
   echo "🚀 Launching new session for ${NAME} in ${WORKDIR}..."
 
-  # Prevent sleep — works with lid closed, no GUI dependency
-  caffeinate -dims &
+  # Prevent sleep — Ubuntu equivalent of caffeinate
+  # Uses systemd-inhibit to block idle/sleep/lid-switch
+  systemd-inhibit --what=idle:sleep:handle-lid-switch \
+    --who="claude-session-${NAME}" \
+    --why="Claude coding session '${SESSION_NAME}' active" \
+    --mode=block \
+    sleep infinity &
   echo $! > /tmp/claude-caffeinate-${NAME}.pid
 
   # Track session start time for statusline uptime
@@ -52,9 +58,9 @@ else
   tmux set-option -t "$SESSION_NAME" status-left-length 50
   tmux set-option -t "$SESSION_NAME" status-left "#[bg=#7aa2f7,fg=#1a1b26,bold]  #S #[bg=#1a1b26,fg=#7aa2f7]"
 
-  # Right: uptime │ memory │ date & time
+  # Right: uptime │ memory │ date & time (Ubuntu-adapted: uses free instead of memory_pressure)
   tmux set-option -t "$SESSION_NAME" status-right-length 140
-  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(memory_pressure | awk '/percentage/{print \$5}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
+  tmux set-option -t "$SESSION_NAME" status-right "#[fg=#3b4261]│ #(sh -c 'read s t < /tmp/claude-keepalive-status 2>/dev/null; ago=\$((\$(date +%%s)-\${t:-0})); if [ \"\$s\" = \"ok\" ] && [ \$ago -lt 120 ]; then printf \"#[fg=#9ece6a]● Keepalive\"; elif [ \"\$s\" = \"fail\" ]; then printf \"#[fg=#f7768e]● Keepalive\"; else printf \"#[fg=#e0af68]○ Keepalive\"; fi') #[fg=#3b4261]│ #[fg=#9ece6a] Mem: #(free -m | awk '/Mem:/{printf \"%%d%%%%\", (\$3/\$2)*100}') #[fg=#3b4261]│ #[fg=#bb9af7] %a %d %b #[fg=#3b4261]│ #[bg=#7aa2f7,fg=#1a1b26,bold] %H:%M "
 
   # Window tabs — show named windows in status bar
   tmux set-option -t "$SESSION_NAME" window-status-format " #[fg=#a9b1d6]#I:#W "
