@@ -142,8 +142,11 @@ curl -fsSL https://tailscale.com/install.sh | sh
 Start and authenticate:
 
 ```bash
-sudo tailscale up
+sudo tailscale up --accept-dns=false
 ```
+
+> **Important:** The `--accept-dns=false` flag prevents Tailscale from overriding your system DNS,
+> which can break your wired/Wi-Fi internet connection on Ubuntu.
 
 Follow the URL in the terminal to authenticate. Confirm your machine appears at https://login.tailscale.com/admin/machines
 
