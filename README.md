@@ -70,9 +70,9 @@ src/
 ├── windows-claude-session.sh   # Windows (WSL2) session launcher
 └── claude-keepalive.sh         # API keepalive (shared, all platforms)
 
-MAC_SETUP.md                    # Full setup guide for macOS
-UBUNTU_SETUP.md                 # Full setup guide for Ubuntu
-WINDOWS_SETUP.md                # Full setup guide for Windows (WSL2)
+SETUP_MAC.md                    # Full setup guide for macOS
+SETUP_UBUNTU.md                 # Full setup guide for Ubuntu
+SETUP_WINDOWS.md                # Full setup guide for Windows (WSL2)
 CLAUDE.md                       # Instructions for Claude Code itself
 ```
 
@@ -84,9 +84,9 @@ Pick your platform and follow the setup guide:
 
 | Platform | Guide | Session Script |
 |---|---|---|
-| **macOS** | [MAC_SETUP.md](MAC_SETUP.md) | `claude-session.sh` |
-| **Ubuntu** | [UBUNTU_SETUP.md](UBUNTU_SETUP.md) | `ubuntu-claude-session.sh` |
-| **Windows (WSL2)** | [WINDOWS_SETUP.md](WINDOWS_SETUP.md) | `windows-claude-session.sh` |
+| **macOS** | [SETUP_MAC.md](SETUP_MAC.md) | `claude-session.sh` |
+| **Ubuntu** | [SETUP_UBUNTU.md](SETUP_UBUNTU.md) | `ubuntu-claude-session.sh` |
+| **Windows (WSL2)** | [SETUP_WINDOWS.md](SETUP_WINDOWS.md) | `windows-claude-session.sh` |
 
 ---
 
