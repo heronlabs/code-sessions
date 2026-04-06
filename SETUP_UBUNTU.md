@@ -207,12 +207,27 @@ mkdir -p ~/Workfolder/workloads
 
 ## 10. Create symbolic links
 
-Link the **Ubuntu version** of the session script:
+Link the **Ubuntu version** of the session script and the statusline script:
 
 ```bash
 ln -sf ~/Workfolder/code-sessions/src/ubuntu-claude-session.sh ~/.claude-session.sh
+mkdir -p ~/.claude
+ln -sf ~/Workfolder/code-sessions/src/ubuntu-statusline-command.sh ~/.claude/statusline-command.sh
 chmod +x ~/Workfolder/code-sessions/src/*.sh
 ```
+
+Then enable the statusline in `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "sh /home/YOUR_USER/.claude/statusline-command.sh"
+  }
+}
+```
+
+> The statusline shows git branch, context usage bar, 5h/7d limits remaining, session uptime, model, and Claude version. It reads your OAuth token from `~/.claude/.credentials.json` to query usage limits — make sure you've logged in with `claude` at least once. Requires `jq` (`sudo apt install jq`).
 
 Verify:
 
