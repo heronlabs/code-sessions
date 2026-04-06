@@ -1,89 +1,136 @@
-# Claude Session Setup — Manual Steps
+# Claude Code Sessions
 
-Follow these steps in order. Everything here requires your confirmation before running.
-
----
-
-## 1. Install dependencies
-
-### Tailscale (for remote SSH access as fallback)
-```bash
-brew install --cask tailscale
-```
-
-Then open Tailscale from Applications and sign in with your account.
-After signing in, confirm your Mac appears at https://login.tailscale.com/admin/machines
+A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. Works on **macOS**, **Ubuntu**, and **Windows (WSL2)**.
 
 ---
 
-## 2. Enable SSH on your Mac
+## How It Works
 
-Go to: **System Settings → General → Sharing → Remote Login** → toggle ON
+### The Workflow
 
-Verify SSH works locally:
+```
+start-s <project>     →  Creates a named tmux session with Claude running inside
+resume-s <project>    →  Reattaches to an existing session
+stop-s <project>      →  Kills the session and cleans up background processes
+```
+
+Each session is fully independent. You can run multiple projects in parallel:
+
 ```bash
-ssh localhost
-# Should connect. Type `exit` to leave.
+start-s frontend      # → tmux session: claude-frontend
+start-s backend       # → tmux session: claude-backend
+start-s infra         # → tmux session: claude-infra
+```
+
+### What Happens When You Run `start-s`
+
+1. **Sleep prevention** starts — keeps the machine awake even with the lid closed
+2. A **tmux session** is created (named `claude-<project>`)
+3. A **keepalive** background process pings `api.anthropic.com` every 55s
+4. **Claude Code** launches in interactive mode inside the project folder
+
+### The Interface
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ #[fg=#7aa2f7]◆ claude                                    │
+│                                                          │
+│  Claude Code interactive session                         │
+│  Working directory: ~/Workfolder/<project>               │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│  session │ ● Keepalive │  Mem: 45% │  Sat 05 Apr │ 14:30│
+└──────────────────────────────────────────────────────────┘
+```
+
+- **Full-screen pane**: Claude Code interactive session
+- **Status bar (bottom)**: session name, keepalive status, memory usage, date/time
+
+### Remote Access
+
+```
+Primary:   claude remote (from Claude app / phone)
+Fallback:  Tailscale SSH → Termius → tmux attach -t claude-<project>
+```
+
+Tailscale creates a private network between your devices — no port forwarding needed.
+
+---
+
+## Repository Structure
+
+```
+src/
+├── mac-claude-session.sh       # macOS session launcher (includes keepalive)
+├── ubuntu-claude-session.sh    # Ubuntu session launcher (includes keepalive)
+└── windows-claude-session.sh   # Windows (WSL2) session launcher (includes keepalive)
+
+SETUP_MAC.md                    # Full setup guide for macOS
+SETUP_UBUNTU.md                 # Full setup guide for Ubuntu
+SETUP_WINDOWS.md                # Full setup guide for Windows (WSL2)
+CLAUDE.md                       # Instructions for Claude Code itself
 ```
 
 ---
 
-## 3. Start Tailscale and note your MagicDNS hostname
+## Quick Start
 
-```bash
-tailscale status
-```
+Pick your platform and follow the setup guide:
 
-You'll see output like:
-```
-100.x.x.x   your-macbook-name   self    macOS   -
-```
-
-Your SSH address from any device will be:
-```
-your-macbook-name.tail12345.ts.net
-```
-
-Or use the IP directly: `100.x.x.x`
-
-`lucass-macbook-pro.tail12345.ts.net`
+| Platform | Guide | Session Script |
+|---|---|---|
+| **macOS** | [SETUP_MAC.md](SETUP_MAC.md) | `mac-claude-session.sh` |
+| **Ubuntu** | [SETUP_UBUNTU.md](SETUP_UBUNTU.md) | `ubuntu-claude-session.sh` |
+| **Windows (WSL2)** | [SETUP_WINDOWS.md](SETUP_WINDOWS.md) | `windows-claude-session.sh` |
 
 ---
 
-## 4. Create symbolic links
+## Multi-Session Support
 
-Instead of copying files, link them so `~/Workfolder/code-sessions/src/` stays the single source of truth.
-Edit the scripts there and the links pick up changes automatically.
+All session scripts support running multiple projects in parallel. Each session gets its own:
+
+- tmux session (`claude-frontend`, `claude-backend`, etc.)
+- Sleep inhibitor PID file (`/tmp/claude-caffeinate-frontend.pid`)
+- Keepalive PID file (`/tmp/claude-keepalive-frontend.pid`)
+- Keepalive status file (`/tmp/claude-keepalive-status-frontend`)
+- Session start timestamp (`/tmp/claude_session_start_frontend`)
+
+Stopping one session does not affect others:
 
 ```bash
-ln -sf ~/Workfolder/code-sessions/src/claude-session.sh ~/.claude-session.sh
-ln -sf ~/Workfolder/code-sessions/src/claude-keepalive.sh ~/.claude-keepalive.sh
-chmod +x ~/Workfolder/code-sessions/src/*.sh
+start-s frontend      # Start project A
+start-s backend       # Start project B — independent of A
+
+stop-s frontend       # Only stops frontend, backend keeps running
 ```
 
-Verify the links are correct:
+List all active sessions:
+
 ```bash
-ls -la ~/.claude-session.sh ~/.claude-keepalive.sh
+tmux ls
 ```
-
-You should see `-> ~/Workfolder/code-sessions/src/...` next to each file.
 
 ---
 
-## 5. Copy CLAUDE.md to your workdir
+## Platform Differences
 
-```bash
-cp ~/Workfolder/code-sessions/CLAUDE.md ~/Workfolder/workloads/CLAUDE.md
-```
-
-> This one is a copy, not a symlink — Claude reads it from the workdir at runtime.
-> Re-run this step whenever you update CLAUDE.md.
+| Feature | macOS | Ubuntu | Windows (WSL2) |
+|---|---|---|---|
+| Sleep prevention | `caffeinate -dims` | `systemd-inhibit` | `powercfg` via PowerShell |
+| Memory in status bar | `memory_pressure` | `free -m` | `free -m` |
+| Package manager | Homebrew | APT | APT (inside WSL) |
+| SSH server | System Settings toggle | `openssh-server` | Windows OpenSSH |
+| Shell | Zsh (default) | `chsh -s $(which zsh)` | `chsh -s $(which zsh)` in WSL |
 
 ---
 
-## 6. Add aliases to your zshrc
+## Shell Aliases (All Platforms)
 
-Open `~/.zshrc` and add this block manually:
+Add to `~/.zshrc`:
 
 ```zsh
 # Claude session management
@@ -96,91 +143,36 @@ resume-s() {
 
 stop-s() {
   if [ -z "$1" ]; then echo "Usage: stop-s <folder>"; return 1; fi
-  local session="claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  local name="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  local session="claude-${name}"
   tmux kill-session -t "$session" 2>/dev/null
-  if [ -f /tmp/claude-caffeinate.pid ]; then
-    kill "$(cat /tmp/claude-caffeinate.pid)" 2>/dev/null
-    rm /tmp/claude-caffeinate.pid
+  if [ -f /tmp/claude-caffeinate-${name}.pid ]; then
+    kill "$(cat /tmp/claude-caffeinate-${name}.pid)" 2>/dev/null
+    rm /tmp/claude-caffeinate-${name}.pid
   fi
+  if [ -f /tmp/claude-keepalive-${name}.pid ]; then
+    kill "$(cat /tmp/claude-keepalive-${name}.pid)" 2>/dev/null
+    rm /tmp/claude-keepalive-${name}.pid
+  fi
+  rm -f /tmp/claude_session_start_${name}
+  rm -f /tmp/claude-keepalive-status-${name}
   echo "Session ${session} stopped."
 }
 
 alias claude-remote-log="tail -f /tmp/claude-remote.log"
 ```
 
-Then reload:
-```bash
-source ~/.zshrc
-```
+> **Note:** The `stop-s` alias uses per-session PID files, so stopping one session never affects another.
 
 ---
 
-## 7. Verify everything works
-
-```bash
-start-s workloads
-```
-
-Once inside tmux you'll see 2 panes:
-- Top (10%): keepalive ping loop
-- Bottom (90%): your interactive Claude session (in `~/Workfolder/workloads`)
-
-```bash
-# Detach from tmux (keeps everything running):
-# Press Ctrl+B, then D
-
-# Resume from another terminal or after opening lid:
-resume-s workloads
-
-# Stop everything cleanly:
-stop-s workloads
-```
-
----
-
-## 8. Set up Termius on your iPhone (remote fallback)
-
-1. Download **Termius** from the App Store (free tier is enough)
-2. Create a new host:
-   - **Hostname:** your Tailscale MagicDNS address (e.g. `your-macbook-name.tail12345.ts.net`)
-   - **Username:** your Mac username (run `whoami` on your Mac to confirm)
-   - **Auth:** use your Mac login password, or set up SSH key (see below)
-3. Connect — you'll land in your Mac's shell
-4. To reattach to your Claude session: `tmux attach -t claude-steve`
-5. To list all running sessions: `tmux ls`
-
-### Optional: SSH key auth (no password needed from phone)
-
-```bash
-# On your Mac, generate a key if you don't have one:
-ssh-keygen -t ed25519 -C "termius-mobile"
-
-# Copy the public key to authorized_keys:
-cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-```
-
-Then in Termius, import the private key (`~/.ssh/id_ed25519`) under **Keychain**.
-
----
-
-## How everything fits together
+## How Everything Fits Together
 
 | Layer | What it does |
 |---|---|
-| `caffeinate -dims` | Prevents display sleep, idle sleep, and disk sleep — lid close works |
+| Sleep inhibitor | Prevents idle/display/lid-close sleep while a session is active |
 | `tmux` | Keeps all processes running detached from any terminal |
-| `keepalive` pane (25%) | Pings Anthropic API every 55s to prevent connection drops |
+| Keepalive (background) | Pings Anthropic API every 55s to prevent connection drops |
 | `CLAUDE.md` | Instructs Claude to compact context silently and never pause for approval |
-| `Tailscale` | Private network between your devices — no port forwarding needed |
-| `SSH + Termius` | Fallback terminal from your iPhone if `claude remote` stops working |
-
-### Remote access paths
-
-```
-Primary:   claude remote (from Claude app / iPhone)
-Fallback:  Tailscale SSH → Termius → tmux attach -t claude-steve → manual control
-```
-
-> No LaunchAgent needed. After a full reboot, run `start-remote-session steve` again.
-> To update any script, edit it in `~/Workfolder/code-sessions/src/` — no re-linking needed.
+| Tailscale | Private network between your devices — no port forwarding needed |
+| SSH + Termius | Fallback terminal from your phone if `claude remote` stops working |
