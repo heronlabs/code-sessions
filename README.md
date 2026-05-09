@@ -9,42 +9,52 @@ A toolkit for running persistent Claude Code sessions via tmux, with remote acce
 ### The Workflow
 
 ```
-start-s <path>       →  Creates a named tmux session with Claude running inside
-resume-s <path>      →  Reattaches to an existing session
-stop-s <path>        →  Kills the session
+start-s <path>       →  Creates a fresh tmux session (random name) with Claude inside
+resume-s <name>      →  Reattaches to a session by its literal name
+stop-s <name>        →  Kills the session by name
+list-s               →  Lists all running sessions (alias for `tmux ls`)
 ```
 
-Each session is fully independent. You can run multiple projects in parallel:
+Every `start-s` produces a brand-new session, even if you point it at a folder that already has one running — names never collide:
 
 ```bash
-start-s frontend                              # → tmux session: frontend
-start-s backend                               # → tmux session: backend
-start-s workloads/.worktrees/foo-bar-baz      # → tmux session: workloads-foo-bar-baz
+start-s workloads                             # → workloads-a3f7c2
+start-s workloads                             # → workloads-9d1e4f  (second session, same dir)
+start-s workloads/.worktrees/foo-bar-baz      # → workloads-foo-bar-baz-2c8b71
 ```
 
-### Session naming
+### Session names
 
-The launcher derives a tmux-safe session name from the path you pass:
+Each session name is `<prefix>-<suffix>`:
 
-1. Lowercase the input.
-2. Split on `/`, drop hidden components (anything starting with `.`).
-3. Replace remaining `.` with `-` and join the components with `-`.
+- **prefix** is derived from the path so you can tell which folder it lives in: lowercased, hidden components (starting with `.`) dropped, remaining components joined with `-` (any `.` inside a non-hidden component also becomes `-`).
+- **suffix** is six random hex chars from `openssl rand -hex 3`, regenerated every invocation.
 
 Examples:
 
-| Input | Session name |
+| Input | Example session name |
 |---|---|
-| `workloads` | `workloads` |
-| `workloads/.worktrees/foo-bar-baz` | `workloads-foo-bar-baz` |
-| `workloads/sub/leaf` | `workloads-sub-leaf` |
+| `start-s workloads` | `workloads-a3f7c2` |
+| `start-s workloads` (run again) | `workloads-9d1e4f` |
+| `start-s workloads/.worktrees/foo-bar-baz` | `workloads-foo-bar-baz-2c8b71` |
 
-This means each git worktree gets its own session automatically — no manual naming needed.
+The launcher prints the generated name on stdout and pins it to the tmux status bar (see below), so you always know which session you're in and what to pass to `resume-s` / `stop-s`.
+
+### Status bar
+
+Every launched session gets a customized tmux status bar:
+
+- **Left:** full session name (`#S`).
+- **Right:** current time and weekday — `HH:MM | <Day>` (e.g. `14:32 | Saturday`).
+
+The bar is scoped to the session being launched, so it never touches your global tmux config or any other running session.
 
 ### What Happens When You Run `start-s`
 
-1. A **tmux session** is created (named via the rule above)
-2. **Claude Code** launches in interactive mode inside the target folder
-3. When you exit Claude, the pane exits, ending tmux automatically
+1. A **tmux session** is created with a random unique name
+2. The status bar is configured (session name | time | weekday)
+3. **Claude Code** launches in interactive mode inside the target folder
+4. When you exit Claude, the pane exits, ending tmux automatically
 
 ### Remote Access
 
@@ -77,20 +87,20 @@ Follow the unified setup guide: **[SETUP.md](SETUP.md)** (covers macOS and Ubunt
 
 ## Multi-Session Support
 
-The launcher supports running multiple projects (and worktrees) in parallel. Each session is its own independent tmux instance:
+Because every `start-s` creates a uniquely-named session, you can run as many in parallel as you like — including multiple in the same folder:
 
 ```bash
-start-s frontend                              # session: frontend
-start-s backend                               # session: backend
-start-s workloads/.worktrees/foo-bar-baz      # session: workloads-foo-bar-baz
+start-s workloads                             # → workloads-a3f7c2
+start-s workloads                             # → workloads-9d1e4f
+start-s workloads/.worktrees/foo-bar-baz      # → workloads-foo-bar-baz-2c8b71
 
-stop-s frontend       # only stops 'frontend'; the others keep running
-```
+list-s
+# workloads-a3f7c2: 1 windows (created ...)
+# workloads-9d1e4f: 1 windows (created ...) (attached)
+# workloads-foo-bar-baz-2c8b71: 1 windows (created ...)
 
-List all active sessions:
-
-```bash
-tmux ls
+resume-s workloads-a3f7c2
+stop-s   workloads-9d1e4f       # only stops that one; the others keep running
 ```
 
 ---
@@ -103,35 +113,22 @@ Add to `~/.zshrc`:
 # Claude session management
 alias start-s="~/.claude-session.sh"
 
-# Same derivation rule as the launcher: lowercase, drop hidden path
-# components, replace '.' with '-', join with '-'.
-_claude_session_name() {
-  local input session="" part
-  input="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-  while [[ -n "$input" ]]; do
-    part="${input%%/*}"
-    if [[ "$input" == *"/"* ]]; then
-      input="${input#*/}"
-    else
-      input=""
-    fi
-    [[ -z "$part" || "$part" == .* ]] && continue
-    session="${session:+${session}-}${part//./-}"
-  done
-  echo "$session"
-}
+# Each start-s invocation creates a uniquely-named session, so resume-s
+# and stop-s take the literal session name (read it from the tmux status
+# bar, or list with `list-s`).
 
 resume-s() {
-  if [ -z "$1" ]; then echo "Usage: resume-s <path>"; return 1; fi
-  tmux attach -t "$(_claude_session_name "$1")"
+  if [ -z "$1" ]; then echo "Usage: resume-s <name>"; return 1; fi
+  tmux attach -t "$1"
 }
 
 stop-s() {
-  if [ -z "$1" ]; then echo "Usage: stop-s <path>"; return 1; fi
-  local session="$(_claude_session_name "$1")"
-  tmux kill-session -t "$session" 2>/dev/null && echo "Session ${session} stopped." \
-    || echo "No session named ${session}."
+  if [ -z "$1" ]; then echo "Usage: stop-s <name>"; return 1; fi
+  tmux kill-session -t "$1" 2>/dev/null && echo "Session $1 stopped." \
+    || echo "No session named $1."
 }
+
+alias list-s="tmux ls"
 ```
 
 ---

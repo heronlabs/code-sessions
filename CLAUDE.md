@@ -18,15 +18,19 @@ The session script is symlinked from `src/` to `~/`:
 ~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
 ```
 
-Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The argument is a folder path under `~/Workfolder/`. Examples:
+Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zshrc`. `start-s` takes a folder path under `~/Workfolder/`; `resume-s` / `stop-s` take a literal session name (read from the tmux status bar or `list-s`). Examples:
 
-- `start-s workloads` → runs Claude in `~/Workfolder/workloads`
-- `start-s workloads/.worktrees/foo-bar-baz` → runs Claude in that nested worktree
+- `start-s workloads` → runs Claude in `~/Workfolder/workloads`, session like `workloads-a3f7c2`
+- `start-s workloads/.worktrees/foo-bar-baz` → runs in that worktree, session like `workloads-foo-bar-baz-2c8b71`
+- `resume-s workloads-a3f7c2` → reattaches to that specific session
+- `stop-s workloads-a3f7c2` → kills that specific session
+- `list-s` → lists all running sessions
 
 ## Key Conventions
 
-- Session names are derived from the path: lowercased, hidden components (starting with `.`) dropped, remaining components joined with `-`. Any remaining `.` inside a non-hidden component is also replaced with `-`.
-  - `workloads` → tmux session `workloads`
-  - `workloads/.worktrees/foo-bar-baz` → tmux session `workloads-foo-bar-baz`
-  - `workloads/sub/leaf` → tmux session `workloads-sub-leaf`
-- The launcher only manages tmux. There is no sleep inhibitor, no status bar, no platform branching — keep it that way.
+- Each session name is `<prefix>-<suffix>`. The prefix is derived from the path (lowercased, hidden components starting with `.` dropped, remaining components joined with `-`; any `.` inside a non-hidden component also becomes `-`). The suffix is six random hex chars from `openssl rand -hex 3`, regenerated every invocation, so two `start-s` calls on the same path always create two distinct sessions.
+  - `workloads` → e.g. `workloads-a3f7c2`
+  - `workloads/.worktrees/foo-bar-baz` → e.g. `workloads-foo-bar-baz-2c8b71`
+  - `workloads/sub/leaf` → e.g. `workloads-sub-leaf-9d1e4f`
+- Every launched session gets a customized tmux status bar: full session name on the left (`#S`), current time and weekday on the right (`%H:%M | %A`). The bar is scoped per-session via `tmux set-option -t <name> ...`, so it never touches the user's global tmux config or any other running session.
+- The launcher only manages tmux (and the per-session status bar). No sleep inhibitor, no platform branching — keep it that way.
