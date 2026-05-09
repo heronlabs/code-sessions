@@ -1,6 +1,6 @@
 # Claude Code Sessions
 
-A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. Works on **macOS**, **Ubuntu**, and **Windows (WSL2)**.
+A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. Works on **macOS** and **Linux** (tested on Ubuntu).
 
 ---
 
@@ -9,52 +9,48 @@ A toolkit for running persistent Claude Code sessions via tmux, with remote acce
 ### The Workflow
 
 ```
-start-s <project>     →  Creates a named tmux session with Claude running inside
-resume-s <project>    →  Reattaches to an existing session
-stop-s <project>      →  Kills the session and cleans up background processes
+start-s <path>       →  Creates a named tmux session with Claude running inside
+resume-s <path>      →  Reattaches to an existing session
+stop-s <path>        →  Kills the session
 ```
 
 Each session is fully independent. You can run multiple projects in parallel:
 
 ```bash
-start-s frontend      # → tmux session: claude-frontend
-start-s backend       # → tmux session: claude-backend
-start-s infra         # → tmux session: claude-infra
+start-s frontend                              # → tmux session: frontend
+start-s backend                               # → tmux session: backend
+start-s workloads/.worktrees/foo-bar-baz      # → tmux session: workloads-foo-bar-baz
 ```
+
+### Session naming
+
+The launcher derives a tmux-safe session name from the path you pass:
+
+1. Lowercase the input.
+2. Split on `/`, drop hidden components (anything starting with `.`).
+3. Replace remaining `.` with `-` and join the components with `-`.
+
+Examples:
+
+| Input | Session name |
+|---|---|
+| `workloads` | `workloads` |
+| `workloads/.worktrees/foo-bar-baz` | `workloads-foo-bar-baz` |
+| `workloads/sub/leaf` | `workloads-sub-leaf` |
+
+This means each git worktree gets its own session automatically — no manual naming needed.
 
 ### What Happens When You Run `start-s`
 
-1. **Sleep prevention** starts — keeps the machine awake even with the lid closed
-2. A **tmux session** is created (named `claude-<project>`)
-3. A **keepalive** background process pings `api.anthropic.com` every 55s
-4. **Claude Code** launches in interactive mode inside the project folder
-
-### The Interface
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ #[fg=#7aa2f7]◆ claude                                    │
-│                                                          │
-│  Claude Code interactive session                         │
-│  Working directory: ~/Workfolder/<project>               │
-│                                                          │
-│                                                          │
-│                                                          │
-│                                                          │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│  session │ ● Keepalive │  Mem: 45% │  Sat 05 Apr │ 14:30│
-└──────────────────────────────────────────────────────────┘
-```
-
-- **Full-screen pane**: Claude Code interactive session
-- **Status bar (bottom)**: session name, keepalive status, memory usage, date/time
+1. A **tmux session** is created (named via the rule above)
+2. **Claude Code** launches in interactive mode inside the target folder
+3. When you exit Claude, the pane exits, ending tmux automatically
 
 ### Remote Access
 
 ```
 Primary:   claude remote (from Claude app / phone)
-Fallback:  Tailscale SSH → Termius → tmux attach -t claude-<project>
+Fallback:  Tailscale SSH → Termius → tmux attach -t <session>
 ```
 
 Tailscale creates a private network between your devices — no port forwarding needed.
@@ -65,13 +61,9 @@ Tailscale creates a private network between your devices — no port forwarding 
 
 ```
 src/
-├── mac-claude-session.sh       # macOS session launcher (includes keepalive)
-├── ubuntu-claude-session.sh    # Ubuntu session launcher (includes keepalive)
-└── windows-claude-session.sh   # Windows (WSL2) session launcher (includes keepalive)
+└── claude-session.sh           # Session launcher (tmux)
 
-SETUP_MAC.md                    # Full setup guide for macOS
-SETUP_UBUNTU.md                 # Full setup guide for Ubuntu
-SETUP_WINDOWS.md                # Full setup guide for Windows (WSL2)
+SETUP.md                        # Setup guide (macOS + Ubuntu)
 CLAUDE.md                       # Instructions for Claude Code itself
 ```
 
@@ -79,33 +71,20 @@ CLAUDE.md                       # Instructions for Claude Code itself
 
 ## Quick Start
 
-Pick your platform and follow the setup guide:
-
-| Platform | Guide | Session Script |
-|---|---|---|
-| **macOS** | [SETUP_MAC.md](SETUP_MAC.md) | `mac-claude-session.sh` |
-| **Ubuntu** | [SETUP_UBUNTU.md](SETUP_UBUNTU.md) | `ubuntu-claude-session.sh` |
-| **Windows (WSL2)** | [SETUP_WINDOWS.md](SETUP_WINDOWS.md) | `windows-claude-session.sh` |
+Follow the unified setup guide: **[SETUP.md](SETUP.md)** (covers macOS and Ubuntu).
 
 ---
 
 ## Multi-Session Support
 
-All session scripts support running multiple projects in parallel. Each session gets its own:
-
-- tmux session (`claude-frontend`, `claude-backend`, etc.)
-- Sleep inhibitor PID file (`/tmp/claude-caffeinate-frontend.pid`)
-- Keepalive PID file (`/tmp/claude-keepalive-frontend.pid`)
-- Keepalive status file (`/tmp/claude-keepalive-status-frontend`)
-- Session start timestamp (`/tmp/claude_session_start_frontend`)
-
-Stopping one session does not affect others:
+The launcher supports running multiple projects (and worktrees) in parallel. Each session is its own independent tmux instance:
 
 ```bash
-start-s frontend      # Start project A
-start-s backend       # Start project B — independent of A
+start-s frontend                              # session: frontend
+start-s backend                               # session: backend
+start-s workloads/.worktrees/foo-bar-baz      # session: workloads-foo-bar-baz
 
-stop-s frontend       # Only stops frontend, backend keeps running
+stop-s frontend       # only stops 'frontend'; the others keep running
 ```
 
 List all active sessions:
@@ -116,19 +95,7 @@ tmux ls
 
 ---
 
-## Platform Differences
-
-| Feature | macOS | Ubuntu | Windows (WSL2) |
-|---|---|---|---|
-| Sleep prevention | `caffeinate -dims` | `systemd-inhibit` | `powercfg` via PowerShell |
-| Memory in status bar | `memory_pressure` | `free -m` | `free -m` |
-| Package manager | Homebrew | APT | APT (inside WSL) |
-| SSH server | System Settings toggle | `openssh-server` | Windows OpenSSH |
-| Shell | Zsh (default) | `chsh -s $(which zsh)` | `chsh -s $(which zsh)` in WSL |
-
----
-
-## Shell Aliases (All Platforms)
+## Shell Aliases
 
 Add to `~/.zshrc`:
 
@@ -136,33 +103,36 @@ Add to `~/.zshrc`:
 # Claude session management
 alias start-s="~/.claude-session.sh"
 
+# Same derivation rule as the launcher: lowercase, drop hidden path
+# components, replace '.' with '-', join with '-'.
+_claude_session_name() {
+  local input session="" part
+  input="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  while [[ -n "$input" ]]; do
+    part="${input%%/*}"
+    if [[ "$input" == *"/"* ]]; then
+      input="${input#*/}"
+    else
+      input=""
+    fi
+    [[ -z "$part" || "$part" == .* ]] && continue
+    session="${session:+${session}-}${part//./-}"
+  done
+  echo "$session"
+}
+
 resume-s() {
-  if [ -z "$1" ]; then echo "Usage: resume-s <folder>"; return 1; fi
-  tmux attach -t "claude-$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  if [ -z "$1" ]; then echo "Usage: resume-s <path>"; return 1; fi
+  tmux attach -t "$(_claude_session_name "$1")"
 }
 
 stop-s() {
-  if [ -z "$1" ]; then echo "Usage: stop-s <folder>"; return 1; fi
-  local name="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-  local session="claude-${name}"
-  tmux kill-session -t "$session" 2>/dev/null
-  if [ -f /tmp/claude-caffeinate-${name}.pid ]; then
-    kill "$(cat /tmp/claude-caffeinate-${name}.pid)" 2>/dev/null
-    rm /tmp/claude-caffeinate-${name}.pid
-  fi
-  if [ -f /tmp/claude-keepalive-${name}.pid ]; then
-    kill "$(cat /tmp/claude-keepalive-${name}.pid)" 2>/dev/null
-    rm /tmp/claude-keepalive-${name}.pid
-  fi
-  rm -f /tmp/claude_session_start_${name}
-  rm -f /tmp/claude-keepalive-status-${name}
-  echo "Session ${session} stopped."
+  if [ -z "$1" ]; then echo "Usage: stop-s <path>"; return 1; fi
+  local session="$(_claude_session_name "$1")"
+  tmux kill-session -t "$session" 2>/dev/null && echo "Session ${session} stopped." \
+    || echo "No session named ${session}."
 }
-
-alias claude-remote-log="tail -f /tmp/claude-remote.log"
 ```
-
-> **Note:** The `stop-s` alias uses per-session PID files, so stopping one session never affects another.
 
 ---
 
@@ -170,9 +140,7 @@ alias claude-remote-log="tail -f /tmp/claude-remote.log"
 
 | Layer | What it does |
 |---|---|
-| Sleep inhibitor | Prevents idle/display/lid-close sleep while a session is active |
-| `tmux` | Keeps all processes running detached from any terminal |
-| Keepalive (background) | Pings Anthropic API every 55s to prevent connection drops |
+| `tmux` | Keeps the Claude process running detached from any terminal |
 | `CLAUDE.md` | Instructs Claude to compact context silently and never pause for approval |
 | Tailscale | Private network between your devices — no port forwarding needed |
 | SSH + Termius | Fallback terminal from your phone if `claude remote` stops working |

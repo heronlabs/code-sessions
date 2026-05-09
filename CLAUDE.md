@@ -4,26 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. The scripts handle session lifecycle (start/resume/stop), sleep prevention (`caffeinate`), and API keepalive pings.
+A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. The script handles session lifecycle (start/resume/stop).
 
 ## Repository Structure
 
-- `src/mac-claude-session.sh` — macOS session launcher. Creates a tmux session with Claude interactive, prevents sleep via `caffeinate -dims`, and runs an inline keepalive that pings `api.anthropic.com` every 55s.
-- `src/ubuntu-claude-session.sh` — Ubuntu session launcher. Same as Mac but uses `systemd-inhibit` for sleep prevention and `free -m` for memory.
-- `src/windows-claude-session.sh` — Windows (WSL2) session launcher. Same as Ubuntu but uses `powercfg` for sleep prevention.
-- `README.md` — Workflow overview and setup guide links for all platforms.
+- `src/claude-session.sh` — Session launcher. Creates a tmux session, runs `claude` interactively in the target folder, and exits the pane (and session) when Claude exits.
+- `README.md` — Workflow overview and setup guide links.
 
 ## Setup
 
-The platform session script is symlinked from `src/` to `~/`:
+The session script is symlinked from `src/` to `~/`:
 ```
-~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/mac-claude-session.sh   # (or ubuntu- or windows-)
+~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
 ```
 
-Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The argument is a folder name under `~/Workfolder/` (e.g., `start-s workloads` runs Claude in `~/Workfolder/workloads`).
+Shell aliases (`start-s`, `resume-s`, `stop-s`) are defined in `~/.zshrc`. The argument is a folder path under `~/Workfolder/`. Examples:
+
+- `start-s workloads` → runs Claude in `~/Workfolder/workloads`
+- `start-s workloads/.worktrees/foo-bar-baz` → runs Claude in that nested worktree
 
 ## Key Conventions
 
-- Session names are lowercased and prefixed with `claude-` (e.g., `claude-steve`).
-- `caffeinate` PID is stored at `/tmp/claude-caffeinate-<name>.pid` (per session) and cleaned up on stop.
-- The keepalive loop is inlined in each platform's session script — no separate keepalive file needed.
+- Session names are derived from the path: lowercased, hidden components (starting with `.`) dropped, remaining components joined with `-`. Any remaining `.` inside a non-hidden component is also replaced with `-`.
+  - `workloads` → tmux session `workloads`
+  - `workloads/.worktrees/foo-bar-baz` → tmux session `workloads-foo-bar-baz`
+  - `workloads/sub/leaf` → tmux session `workloads-sub-leaf`
+- The launcher only manages tmux. There is no sleep inhibitor, no status bar, no platform branching — keep it that way.
