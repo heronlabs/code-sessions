@@ -32,5 +32,5 @@ Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zsh
   - `workloads` → e.g. `workloads-a3f7c2`
   - `workloads/.worktrees/foo-bar-baz` → e.g. `workloads-foo-bar-baz-2c8b71`
   - `workloads/sub/leaf` → e.g. `workloads-sub-leaf-9d1e4f`
-- Every launched session gets a customized tmux status bar: full session name on the left (`#S`), current time and weekday on the right (`%H:%M | %A`). The bar is scoped per-session via `tmux set-option -t <name> ...`, so it never touches the user's global tmux config or any other running session.
+- Every launched session disables the tmux status bar (`tmux set-option -t <name> status off`). The setting is scoped per-session, so it never touches the user's global tmux config or any other running session.
 - The launcher only manages tmux (and the per-session status bar). No sleep inhibitor, no platform branching — keep it that way.

@@ -33,13 +33,7 @@ tmux new-session -d -s "$SESSION_NAME"
 tmux set-option -t "$SESSION_NAME" mouse on
 tmux set-option -t "$SESSION_NAME" history-limit 10000
 
-# Status bar: full session name on the left, time | weekday on the right.
-tmux set-option -t "$SESSION_NAME" status on
-tmux set-option -t "$SESSION_NAME" status-interval 30
-tmux set-option -t "$SESSION_NAME" status-left-length 60
-tmux set-option -t "$SESSION_NAME" status-right-length 60
-tmux set-option -t "$SESSION_NAME" status-left  " #[bold]#S "
-tmux set-option -t "$SESSION_NAME" status-right " %H:%M | %A "
+tmux set-option -t "$SESSION_NAME" status off
 
 # Launch Claude; exit the pane (and session) when claude exits
 tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions --remote-control --name '${SESSION_NAME}'; exit" Enter
