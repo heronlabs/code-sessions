@@ -36,6 +36,9 @@ tmux set-option -t "$SESSION_NAME" history-limit 10000
 tmux set-option -t "$SESSION_NAME" status off
 
 # Launch Claude; exit the pane (and session) when claude exits
-tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions --remote-control '${SESSION_NAME}' --name '${SESSION_NAME}'; exit" Enter
+tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions --remote-control '${SESSION_NAME}'; exit" Enter
+
+# Once Claude has booted, run /rename to label the session inside Claude.
+( sleep 5 && tmux send-keys -t "${SESSION_NAME}.0" "/rename ${SESSION_NAME}" Enter ) &
 
 tmux attach -t "$SESSION_NAME"
