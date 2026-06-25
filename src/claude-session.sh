@@ -2,6 +2,13 @@
 
 # Claude Code session launcher using tmux.
 # Invoked via the ~/.claude-session.sh symlink and the start-s alias.
+# Resolve the real script directory (follow symlinks — this script is
+# invoked via ~/.claude-session.sh which is a symlink into this repo).
+_script="$0"
+[ -L "$_script" ] && _script="$(readlink "$_script")"
+SCRIPT_DIR="$(cd "$(dirname "$_script")" && pwd)"
+source "$SCRIPT_DIR/session-name.sh"
+
 if [ -z "$1" ]; then
   echo "Usage: start-s <folder>"
   echo "  e.g. start-s workloads"
@@ -12,12 +19,7 @@ fi
 #   prefix  — derived from the path so you can tell which folder it lives in:
 #             lowercased, hidden components dropped, joined with '-'.
 #   suffix  — six random hex chars so every invocation is unique.
-PREFIX=""
-IFS='/' read -ra _parts <<< "$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-for _p in "${_parts[@]}"; do
-  [[ -z "$_p" || "$_p" == .* ]] && continue
-  PREFIX="${PREFIX:+${PREFIX}-}${_p//./-}"
-done
+PREFIX="$(session_prefix "$1")"
 SUFFIX="$(openssl rand -hex 3)"
 SESSION_NAME="${PREFIX}-${SUFFIX}"
 WORKDIR="$HOME/Workfolder/${1}"
