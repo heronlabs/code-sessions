@@ -6,7 +6,7 @@ One guide for **macOS** and **Ubuntu**. Steps that differ are split into two sho
 
 ## 1. Install prerequisites
 
-You need: **tmux**, **zsh**, **Node.js**, **Claude Code CLI**, **Tailscale**, and an **SSH server**.
+You need: **tmux**, **zsh**, **Node.js**, **Python 3.10+**, **Claude Code CLI**, **Headroom**, **Tailscale**, and an **SSH server**.
 
 ### macOS
 
@@ -14,11 +14,14 @@ You need: **tmux**, **zsh**, **Node.js**, **Claude Code CLI**, **Tailscale**, an
 # Homebrew (skip if installed)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# tmux + node
-brew install tmux node
+# tmux + node + python
+brew install tmux node python
 
 # Claude Code
 npm install -g @anthropic-ai/claude-code
+
+# Headroom (API compression proxy)
+pip install "headroom-ai[all]"
 
 # Tailscale (GUI app)
 brew install --cask tailscale
@@ -32,8 +35,8 @@ Zsh is already the default shell on modern macOS.
 ```bash
 sudo apt update && sudo apt upgrade -y
 
-# tmux + zsh + ssh
-sudo apt install -y tmux zsh openssh-server
+# tmux + zsh + ssh + python
+sudo apt install -y tmux zsh openssh-server python3 python3-pip
 
 # Make zsh the default shell (log out/in afterwards)
 chsh -s "$(which zsh)"
@@ -44,6 +47,9 @@ sudo apt install -y nodejs
 
 # Claude Code
 npm install -g @anthropic-ai/claude-code
+
+# Headroom (API compression proxy)
+pip install "headroom-ai[all]"
 
 # Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
@@ -59,14 +65,26 @@ sudo systemctl enable --now ssh
 
 ---
 
-## 2. Authenticate Claude
+## 2. Configure API access
 
-Run `claude` once and complete the auth flow.
+This repo uses DeepSeek models via the Anthropic-compatible API. The settings file at `~/.claude/claude-deepseek-settings.json` (symlinked from the repo's `src/`) tells Claude Code which models and API key to use.
+
+1. Copy the template from the repo and edit your key:
 
 ```bash
-claude --version
-claude
+cp ~/Workfolder/code-sessions/src/claude-deepseek-settings.json \
+   ~/.claude/claude-deepseek-settings.json
+# Edit the file and replace ANTHROPIC_API_KEY with your actual key
 ```
+
+2. Create the symlink so the repo copy stays accessible:
+
+```bash
+ln -sf ~/Workfolder/code-sessions/src/claude-deepseek-settings.json \
+       ~/.claude/claude-deepseek-settings.json
+```
+
+> The `claude-session.sh` script passes `--settings ~/.claude/claude-deepseek-settings.json` to every launched session.
 
 ---
 
@@ -125,13 +143,16 @@ ls -la ~/.claude-session.sh
 
 ---
 
-## 6. Copy `CLAUDE.md` into your workdir
+## 6. CLAUDE.md (optional)
+
+This repo's `CLAUDE.md` is project-level documentation for how Claude should work with the codebase itself. You don't need to copy it into workdirs — each workdir should have its own `CLAUDE.md` tailored to what that Claude session is for.
+
+If you want a starting template:
 
 ```bash
 cp ~/Workfolder/code-sessions/CLAUDE.md ~/Workfolder/workloads/CLAUDE.md
+# Edit to match your session's purpose
 ```
-
-> This is a copy, not a symlink — Claude reads it from the workdir at runtime. Re-run when you update the source.
 
 ---
 
@@ -168,14 +189,14 @@ start-s workloads/.worktrees/demo      # session: workloads-demo
 
 ---
 
-## 9. Termius (mobile fallback)
+## 9. Termius (mobile access)
 
 1. Install **Termius** (App Store / Google Play).
 2. New host:
    - **Hostname:** your Tailscale MagicDNS address (e.g. `your-hostname.tail12345.ts.net`)
    - **Username:** result of `whoami`
    - **Auth:** password or SSH key
-3. Connect, then `tmux attach -t <session>` (e.g. `tmux attach -t workloads`).
+3. Connect, then attach to a session: `tmux attach -t <name>`.
 4. List sessions: `tmux ls`.
 
 ### Optional: SSH key auth
@@ -195,9 +216,10 @@ Import the private key in Termius under **Keychain**.
 | Layer | What it does |
 |---|---|
 | `tmux` | Keeps Claude running detached from any terminal |
-| `CLAUDE.md` | Instructs Claude to compact context silently and never pause for approval |
+| `headroom` | Compression proxy between Claude and the API (47-92% input token savings) |
+| `CLAUDE.md` | Project-level instructions for Claude when working on this repo |
 | Tailscale | Private network between your devices — no port forwarding |
-| SSH + Termius | Fallback terminal from your phone if `claude remote` stops working |
+| SSH + Termius | Terminal access from your phone to attach to tmux sessions |
 
 After a reboot, just run `start-s <folder>` again. To update the launcher, edit `~/Workfolder/code-sessions/src/claude-session.sh` — no re-linking needed.
 

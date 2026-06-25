@@ -1,6 +1,6 @@
 # Claude Code Sessions
 
-A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. Works on **macOS** and **Linux** (tested on Ubuntu).
+A toolkit for running persistent Claude Code sessions via tmux through the Headroom proxy with DeepSeek models. Works on **macOS** and **Linux** (tested on Ubuntu).
 
 ---
 
@@ -40,27 +40,19 @@ Examples:
 
 The launcher prints the generated name on stdout and pins it to the tmux status bar (see below), so you always know which session you're in and what to pass to `resume-s` / `stop-s`.
 
-### Status bar
-
-Every launched session gets a customized tmux status bar:
-
-- **Left:** full session name (`#S`).
-- **Right:** current time and weekday — `HH:MM | <Day>` (e.g. `14:32 | Saturday`).
-
-The bar is scoped to the session being launched, so it never touches your global tmux config or any other running session.
-
 ### What Happens When You Run `start-s`
 
 1. A **tmux session** is created with a random unique name
-2. The status bar is configured (session name | time | weekday)
-3. **Claude Code** launches in interactive mode inside the target folder
+2. Per-session tmux options are set: status bar disabled, mouse on, history-limit 10000
+3. **Claude Code** launches via `headroom wrap` with DeepSeek settings, inside the target folder
 4. When you exit Claude, the pane exits, ending tmux automatically
 
 ### Remote Access
 
+Access your tmux sessions from any device via Tailscale SSH:
+
 ```
-Primary:   claude remote (from Claude app / phone)
-Fallback:  Tailscale SSH → Termius → tmux attach -t <session>
+Tailscale SSH → Termius → tmux attach -t <session>
 ```
 
 Tailscale creates a private network between your devices — no port forwarding needed.
@@ -137,7 +129,8 @@ alias list-s="tmux ls"
 
 | Layer | What it does |
 |---|---|
-| `tmux` | Keeps the Claude process running detached from any terminal |
-| `CLAUDE.md` | Instructs Claude to compact context silently and never pause for approval |
+| `tmux` | Keeps Claude running detached from any terminal |
+| `headroom` | Compression proxy between Claude and the API (47-92% input token savings) |
+| `CLAUDE.md` | Project-level instructions for Claude when working on this repo |
 | Tailscale | Private network between your devices — no port forwarding needed |
-| SSH + Termius | Fallback terminal from your phone if `claude remote` stops working |
+| SSH + Termius | Terminal access from your phone to attach to tmux sessions |

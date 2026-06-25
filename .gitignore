@@ -1,1 +1,6 @@
 *zshrc
+
+src/*.json
+
+.serena
+

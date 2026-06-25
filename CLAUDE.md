@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-A toolkit for running persistent Claude Code sessions via tmux, with remote access fallback through Tailscale SSH. The script handles session lifecycle (start/resume/stop).
+A toolkit for running persistent Claude Code sessions via tmux through the Headroom proxy. The script handles session lifecycle (start/resume/stop).
 
 ## Repository Structure
 
@@ -33,4 +33,4 @@ Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zsh
   - `workloads/.worktrees/foo-bar-baz` → e.g. `workloads-foo-bar-baz-2c8b71`
   - `workloads/sub/leaf` → e.g. `workloads-sub-leaf-9d1e4f`
 - Every launched session disables the tmux status bar (`tmux set-option -t <name> status off`). The setting is scoped per-session, so it never touches the user's global tmux config or any other running session.
-- The launcher only manages tmux (and the per-session status bar). No sleep inhibitor, no platform branching — keep it that way.
+- The launcher sets per-session tmux options: status bar off, mouse on, history-limit 10000. No sleep inhibitor, no platform branching — keep it that way.
