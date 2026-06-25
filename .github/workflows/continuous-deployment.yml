@@ -5,9 +5,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: googleapis/release-please-action@0b6b3fc0186a2f7118bfd88fab9ea481e1839504
