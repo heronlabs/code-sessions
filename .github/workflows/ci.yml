@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ludeeus/action-shellcheck@94e0aab03ca135d11a35e5a9e4e28981a3829c54
+      - uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca
         with:
           scandir: ./src
 
@@ -17,5 +17,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: bats-core/bats-action@2c88fe0acb1a9b4f2042c029c89185c65c8d3201
+      - uses: bats-core/bats-action@562ebf679115bde788f656cd532408c2d125297d
       - run: bats tests/
