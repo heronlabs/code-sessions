@@ -1,6 +1,6 @@
 # 📟 code-sessions — Persistent Claude Code tmux Sessions
 
-[![CI](https://github.com/lucaslacerda/code-sessions/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/lucaslacerda/code-sessions/actions/workflows/continuous-integration.yml)
+[![CI](https://github.com/heronlabs/code-sessions/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/heronlabs/code-sessions/actions/workflows/continuous-integration.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 A toolkit for running persistent [Claude Code](https://claude.ai/code) sessions via tmux through the [Headroom](https://github.com/lucaslacerda/headroom) compression proxy with DeepSeek models. Works on **macOS** and **Linux** (tested on Ubuntu).
