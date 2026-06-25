@@ -34,3 +34,12 @@ Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zsh
   - `workloads/sub/leaf` → e.g. `workloads-sub-leaf-9d1e4f`
 - Every launched session disables the tmux status bar (`tmux set-option -t <name> status off`). The setting is scoped per-session, so it never touches the user's global tmux config or any other running session.
 - The launcher sets per-session tmux options: status bar off, mouse on, history-limit 10000. No sleep inhibitor, no platform branching — keep it that way.
+
+<!-- supera:guardrails -->
+## Working with this repo (managed by /start — edits between these markers are overwritten on re-run)
+
+- **Edit, don't rewrite.** Change only the needed entry in a config/generated file (`package.json`, lockfiles, manifests, CI yaml); preserve the rest. Never regenerate a whole file to add one line.
+- **No scope creep.** Build only what was asked; no speculative abstractions, layers, or options. Prefer the simplest working solution.
+- **Ambiguous literals: flag, don't guess.** Config keys, IDs, and env names can be literal values, not mappings. State which reading you took.
+- **Scope a change to where it belongs** — most changes are localized to one area; touch other repos only when the change genuinely cuts across, and then update the related repos too.
+<!-- /supera:guardrails -->
