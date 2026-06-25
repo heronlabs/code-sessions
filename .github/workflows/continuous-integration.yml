@@ -1,12 +1,13 @@
-name: CI
+name: 'Continuous Integration'
 
 on:
-  push:
   pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca
@@ -14,7 +15,7 @@ jobs:
           scandir: ./src
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: bats-core/bats-action@562ebf679115bde788f656cd532408c2d125297d
