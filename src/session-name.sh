@@ -13,7 +13,7 @@
 session_prefix() {
   local path="$1"
   local prefix=""
-  local _p
+  local _p _parts
   IFS='/' read -ra _parts <<< "$(echo "$path" | tr '[:upper:]' '[:lower:]')"
   for _p in "${_parts[@]}"; do
     [[ -z "$_p" || "$_p" == .* ]] && continue
