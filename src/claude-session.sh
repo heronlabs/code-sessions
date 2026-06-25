@@ -7,6 +7,7 @@
 _script="$0"
 [ -L "$_script" ] && _script="$(readlink "$_script")"
 SCRIPT_DIR="$(cd "$(dirname "$_script")" && pwd)"
+# shellcheck disable=SC1091  # source path resolved dynamically (symlink-safe)
 source "$SCRIPT_DIR/session-name.sh"
 
 if [ -z "$1" ]; then
