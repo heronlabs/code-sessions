@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/heronlabs/code-sessions/compare/v1.0.0...v1.0.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* rename CD workflow, add CI permissions and concurrency ([#8](https://github.com/heronlabs/code-sessions/issues/8)) ([975bb78](https://github.com/heronlabs/code-sessions/commit/975bb78b13dc7d929445eb652f12dc5b5dc2e78b))
+
 ## 1.0.0 (2026-06-25)
 
 
