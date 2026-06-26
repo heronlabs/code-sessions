@@ -1,9 +1,12 @@
-name: Release
+name: 'Continuous Deployment'
 
 on:
   push:
     branches:
       - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
