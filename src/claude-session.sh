@@ -39,7 +39,7 @@ tmux set-option -t "$SESSION_NAME" history-limit 10000
 tmux set-option -t "$SESSION_NAME" status off
 
 # Launch Claude; exit the pane (and session) when claude exits
-tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && headroom wrap claude --dangerously-skip-permissions --settings ~/.claude/claude-deepseek-settings.json; exit" Enter
+tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && headroom wrap claude --dangerously-skip-permissions --settings ~/.claude/claude-api-settings.json; exit" Enter
 
 # Only attach when running in an interactive terminal (not from systemd/cron)
 if [ -t 0 ]; then

@@ -67,24 +67,24 @@ sudo systemctl enable --now ssh
 
 ## 2. Configure API access
 
-This repo uses DeepSeek models via the Anthropic-compatible API. The settings file at `~/.claude/claude-deepseek-settings.json` (symlinked from the repo's `src/`) tells Claude Code which models and API key to use.
+This repo uses DeepSeek models via the Anthropic-compatible API. The settings file at `~/.claude/claude-api-settings.json` (symlinked from the repo's `src/`) tells Claude Code which models and API key to use.
 
 1. Copy the template from the repo and edit your key:
 
 ```bash
-cp ~/Workfolder/code-sessions/src/claude-deepseek-settings.json \
-   ~/.claude/claude-deepseek-settings.json
+cp ~/Workfolder/code-sessions/src/claude-api-settings.json \
+   ~/.claude/claude-api-settings.json
 # Edit the file and replace ANTHROPIC_API_KEY with your actual key
 ```
 
 2. Create the symlink so the repo copy stays accessible:
 
 ```bash
-ln -sf ~/Workfolder/code-sessions/src/claude-deepseek-settings.json \
-       ~/.claude/claude-deepseek-settings.json
+ln -sf ~/Workfolder/code-sessions/src/claude-api-settings.json \
+       ~/.claude/claude-api-settings.json
 ```
 
-> The `claude-session.sh` script passes `--settings ~/.claude/claude-deepseek-settings.json` to every launched session.
+> The `claude-session.sh` script passes `--settings ~/.claude/claude-api-settings.json` to every launched session.
 
 ---
 
