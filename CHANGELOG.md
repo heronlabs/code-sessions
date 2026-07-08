@@ -1,3 +1,9 @@
+## v2.0.1 (2026-07-08)
+
+### Bug Fixes
+
+* fix: Fix check-balance.sh to parse balance_infos[0].total_balance instead of .balance to match real DeepSeek API response format (#16) (79a88aeca4da77e084ed61fb534cf323aab52433)
+
 ## v2.0.0 (2026-07-08)
 
 
