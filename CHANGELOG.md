@@ -1,3 +1,9 @@
+## v2.1.0 (2026-07-08)
+
+### Features
+
+* feat: add ccstatusline config symlink (#17) (f6a7505b2e433e9bec6a7c1eabb9776d0fbc4bb2)
+
 ## v2.0.1 (2026-07-08)
 
 ### Bug Fixes
