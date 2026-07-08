@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/heronlabs/code-sessions/compare/v1.0.1...v1.1.0) (2026-07-08)
+
+
+### Features
+
+* Create src/check-balance.sh to check DeepSeek API balance with bats tests ([#12](https://github.com/heronlabs/code-sessions/issues/12)) ([bd1723c](https://github.com/heronlabs/code-sessions/commit/bd1723c702c94dbdd4a16dd9e1ef33593a64f3cf))
+
+
+### Bug Fixes
+
+* add .worktrees to .gitignore ([5fae742](https://github.com/heronlabs/code-sessions/commit/5fae742a36aa4176e56ddd11ceb9b30eea2c6cf0))
+* update settings file reference from claude-deepseek-settings.json to claude-api-settings.json ([fd16984](https://github.com/heronlabs/code-sessions/commit/fd169841974d08e55b139d297c67a09e341457a2))
+
 ## [1.0.1](https://github.com/heronlabs/code-sessions/compare/v1.0.0...v1.0.1) (2026-06-26)
 
 
