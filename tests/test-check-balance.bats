@@ -60,7 +60,7 @@ MOCKEOF
 JSONEOF
 
   export CHECK_BALANCE_SETTINGS="$MOCK_SETTINGS"
-  export MOCK_RESPONSE='{"balance": 2.52, "is_available": true}'
+  export MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"2.52","granted_balance":"0.00","topped_up_balance":"2.52"}]}'
   export MOCK_EXIT_CODE=0
 }
 
@@ -79,14 +79,14 @@ teardown() {
 }
 
 @test "zero balance prints \$0.00" {
-  export MOCK_RESPONSE='{"balance": 0, "is_available": false}'
+  export MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"0.00","granted_balance":"0.00","topped_up_balance":"0.00"}]}'
   run "$CHECK_BALANCE"
   [ "$status" -eq 0 ]
   [ "$output" = '$0.00' ]
 }
 
 @test "balance with single decimal prints \$X.X0" {
-  export MOCK_RESPONSE='{"balance": 2.5}'
+  export MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"2.5","granted_balance":"0.00","topped_up_balance":"2.5"}]}'
   run "$CHECK_BALANCE"
   [ "$status" -eq 0 ]
   [ "$output" = '$2.50' ]

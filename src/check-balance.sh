@@ -51,7 +51,7 @@ if ! RESPONSE="$(curl -sS --fail-with-body "$URL" -H "Authorization: Bearer $TOK
 fi
 
 # Parse the balance from the JSON response.
-BALANCE="$(echo "$RESPONSE" | jq -r '.balance // empty' 2>/dev/null || true)"
+BALANCE="$(echo "$RESPONSE" | jq -r '.balance_infos[0].total_balance // empty' 2>/dev/null || true)"
 if [ -z "$BALANCE" ]; then
   echo "Error: unexpected response format — could not extract balance" >&2
   echo "$RESPONSE" >&2
