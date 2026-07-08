@@ -1,36 +1,35 @@
 name: 'Continuous Deployment'
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      semantic:
+        description: The SEMVER specification.
+        required: true
+        type: choice
+        default: patch
+        options:
+          - major
+          - minor
+          - patch
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  pull-requests: write
-  issues: write
 
 jobs:
   release:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - id: release
-        uses: googleapis/release-please-action@0b6b3fc0186a2f7118bfd88fab9ea481e1839504
         with:
-          release-type: simple
+          fetch-depth: 0
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
-      - name: Tag major and minor versions
-        if: ${{ steps.release.outputs.release_created }}
-        run: |
-          git tag -d v${{ steps.release.outputs.major }} || true
-          git tag -d v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} || true
-          git push origin :v${{ steps.release.outputs.major }} || true
-          git push origin :v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} || true
-          git tag -a v${{ steps.release.outputs.major }} -m "Release v${{ steps.release.outputs.major }}"
-          git tag -a v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} -m "Release v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}"
-          git push origin v${{ steps.release.outputs.major }}
-          git push origin v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
+      - run: git pull --rebase origin main
+      - uses: heronlabs/action-tag-release-build@v5.0.11
+        id: version
+        with:
+          gh_token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          semantic: ${{ inputs.semantic }}
