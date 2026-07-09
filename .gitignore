@@ -1,8 +1,17 @@
+# OSX
+.DS_Store
+node_modules
+
+# Supera
+.worktrees/
+.supera/
+.serena/
+
+# Editor
+.vscode/
+.idea/
+.claude/settings.local.json
+
+# Project-specific
 *zshrc
-
 src/*.json
-
-.serena
-
-.worktrees
-.supera
