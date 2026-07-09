@@ -1,3 +1,9 @@
+## v2.3.2 (2026-07-09)
+
+### Bug Fixes
+
+* fix: fix Makefile lint path and shellcheck warnings (fabddfca2dfeaf68784fa61a256b0c38270a303b)
+
 ## v2.3.1 (2026-07-09)
 
 
