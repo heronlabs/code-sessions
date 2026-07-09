@@ -18,9 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: 'Install shellcheck'
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca
 
       - name: 'Run shellcheck'
         shell: bash
