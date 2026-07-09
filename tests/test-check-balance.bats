@@ -75,21 +75,21 @@ teardown() {
 @test "successful balance response prints \$X.XX" {
   run "$CHECK_BALANCE"
   [ "$status" -eq 0 ]
-  [ "$output" = '$2.52' ]
+  [ "$output" = "\$2.52" ]
 }
 
 @test "zero balance prints \$0.00" {
-  export MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"0.00","granted_balance":"0.00","topped_up_balance":"0.00"}]}'
+  MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"0.00","granted_balance":"0.00","topped_up_balance":"0.00"}]}'
   run "$CHECK_BALANCE"
   [ "$status" -eq 0 ]
-  [ "$output" = '$0.00' ]
+  [ "$output" = "\$0.00" ]
 }
 
 @test "balance with single decimal prints \$X.X0" {
-  export MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"2.5","granted_balance":"0.00","topped_up_balance":"2.5"}]}'
+  MOCK_RESPONSE='{"is_available":true,"balance_infos":[{"currency":"USD","total_balance":"2.5","granted_balance":"0.00","topped_up_balance":"2.5"}]}'
   run "$CHECK_BALANCE"
   [ "$status" -eq 0 ]
-  [ "$output" = '$2.50' ]
+  [ "$output" = "\$2.50" ]
 }
 
 # ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ JSONEOF
 }
 
 @test "bad JSON response exits non-zero and prints error" {
-  export MOCK_RESPONSE='not valid json'
+  MOCK_RESPONSE='not valid json'
   run "$CHECK_BALANCE"
   [ "$status" -ne 0 ]
   echo "$output" | grep -qi "error"

@@ -4,4 +4,4 @@ test:
 	bats tests/
 
 lint:
-	shellcheck core/*.sh tests/*.bats tests/__mocks__/*
+	shellcheck src/*.sh tests/*.bats
