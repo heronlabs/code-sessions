@@ -1,3 +1,13 @@
+## v2.2.2 (2026-07-09)
+
+### Bug Fixes
+
+* fix: update context-bar color to blue and restore powerline separators (ab209f90512454780b96dc4e6a26ac1f7452be12)
+
+### Miscellaneous Chores
+
+* other: Merge branch 'main' of github.com:heronlabs/code-sessions (6642515512e97ff2c159b518f6b4dbc715c18eed)
+
 ## v2.2.1 (2026-07-09)
 
 ### Bug Fixes
