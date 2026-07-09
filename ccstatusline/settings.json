@@ -1,1 +1,103 @@
-/Users/lucaslacerdacl/.config/ccstatusline/settings.json
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "7",
+        "type": "git-origin-repo",
+        "color": ""
+      },
+      {
+        "id": "8d39fb21-e976-48e4-8098-6c855e6be786",
+        "type": "separator"
+      },
+      {
+        "id": "5",
+        "type": "git-branch",
+        "color": "brightCyan"
+      },
+      {
+        "id": "686bd18c-691c-4408-b2fa-4e41ae3d91e3",
+        "type": "separator"
+      },
+      {
+        "id": "6f69540a-a986-4102-abe5-5805da9936f3",
+        "type": "worktree-name",
+        "color": "brightCyan"
+      }
+    ],
+    [
+      {
+        "id": "6bba6406-d1a1-49e8-b40a-aa44b25bf5d1",
+        "type": "git-review",
+        "color": ""
+      },
+      {
+        "id": "4462cb07-a1c9-4bb1-9dc1-9045884a57ba",
+        "type": "git-changes",
+        "color": "brightGreen"
+      }
+    ],
+    [
+      {
+        "id": "2149a7b9-f386-4001-a2d8-366875978d8b",
+        "type": "model",
+        "color": "blue"
+      },
+      {
+        "id": "3ff619ed-9b50-4fef-a02b-25402fc6aa43",
+        "type": "thinking-effort",
+        "color": "blue"
+      },
+      {
+        "id": "7356a395-c1c5-408b-b98b-650ea010ba77",
+        "type": "separator"
+      },
+      {
+        "id": "35473fb6-94eb-4e8a-95b6-1fcbb3f91075",
+        "type": "custom-command",
+        "color": "brightBlue",
+        "commandPath": "/Users/lucaslacerdacl/Workfolder/heronlabs/ai/code-sessions/src/check-balance.sh"
+      }
+    ],
+    [
+      {
+        "id": "d3ffac0f-e218-4d7b-9150-ce4f74eb1812",
+        "type": "context-bar",
+        "color": "brightYellow"
+      },
+      {
+        "id": "32c95aa1-ee17-4fde-a973-30760ed5d2fc",
+        "type": "free-memory",
+        "color": "brightMagenta"
+      },
+      {
+        "id": "7ab81a35-132a-431c-9d31-ec048f37d09b",
+        "type": "session-clock",
+        "color": "brightMagenta"
+      }
+    ]
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 1,
+  "defaultPadding": " ",
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": true,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "theme": "nord-aurora",
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  }
+}
