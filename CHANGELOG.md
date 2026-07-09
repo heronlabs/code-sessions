@@ -1,3 +1,9 @@
+## v2.2.0 (2026-07-09)
+
+### Features
+
+* feat: symlink ccstatusline config to live source (#18) (606917280fb560cedd7d463c3ffd5c0f5dd8067f)
+
 ## v2.1.0 (2026-07-08)
 
 ### Features
