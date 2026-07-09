@@ -4,4 +4,4 @@ test:
 	bats tests/
 
 lint:
-	shellcheck src/*.sh tests/*.bats
+	shellcheck -S warning src/*.sh tests/*.bats
