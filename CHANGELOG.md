@@ -1,3 +1,9 @@
+## v2.2.1 (2026-07-09)
+
+### Bug Fixes
+
+* fix: reverse ccstatusline settings symlink direction (#19) (f7ebe0c6eca60df2faeaf511163b8f45bc164e51)
+
 ## v2.2.0 (2026-07-09)
 
 ### Features
