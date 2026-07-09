@@ -64,7 +64,7 @@
       {
         "id": "d3ffac0f-e218-4d7b-9150-ce4f74eb1812",
         "type": "context-bar",
-        "color": "brightYellow"
+        "color": "blue"
       },
       {
         "id": "32c95aa1-ee17-4fde-a973-30760ed5d2fc",
@@ -88,12 +88,8 @@
   "minimalistMode": true,
   "powerline": {
     "enabled": false,
-    "separators": [
-      ""
-    ],
-    "separatorInvertBackground": [
-      false
-    ],
+    "separators": [""],
+    "separatorInvertBackground": [false],
     "startCaps": [],
     "endCaps": [],
     "theme": "nord-aurora",
