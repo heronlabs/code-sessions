@@ -1,3 +1,9 @@
+## v2.3.0 (2026-07-09)
+
+### Features
+
+* feat: update CI workflow and add Makefile for linting and testing (a88711f9ffca3aab5f0e9455b3a7d81116606031)
+
 ## v2.2.2 (2026-07-09)
 
 ### Bug Fixes
