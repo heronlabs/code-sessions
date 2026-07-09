@@ -6,3 +6,7 @@ src/*.json
 
 .worktrees
 .supera
+
+.DS_Store
+
+node_modules
