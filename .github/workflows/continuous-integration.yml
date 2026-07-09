@@ -18,8 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca
-
       - name: 'Run shellcheck'
         shell: bash
         run: make lint
@@ -29,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: bats-core/bats-action@77d6fb60505b4d0d1d73e48bd035b55074bbfb43 # 4.0.0
+      - uses: bats-core/bats-action@4.0.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
