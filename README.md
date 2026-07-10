@@ -217,8 +217,8 @@ A shared bash library that derives a tmux session prefix from any path. Used by 
 ## Contributing
 
 ```bash
-bats tests/           # run BATS tests
-shellcheck src/*.sh   # lint shell scripts
+make test    # run BATS tests (tests/)
+make lint    # shellcheck src/*.sh AND tests/*.bats
 ```
 
 ### Commit Convention
