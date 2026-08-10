@@ -1,3 +1,9 @@
+## v2.3.7 (2026-08-10)
+
+### Bug Fixes
+
+* fix: remove custom command from settings and adjust default padding side (4f5b495324a45acb4245ced2d36ea7e088399a13)
+
 ## v2.3.6 (2026-08-10)
 
 ### Bug Fixes
