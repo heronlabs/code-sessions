@@ -1,3 +1,9 @@
+## v2.3.6 (2026-08-10)
+
+### Bug Fixes
+
+* fix: replace 'headroom wrap' with 'claude' in session launch command (f8035ed902aa968dd3c4cc8700c4bef2448fa05c)
+
 ## v2.3.5 (2026-07-17)
 
 
