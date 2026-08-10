@@ -52,12 +52,6 @@
       {
         "id": "7356a395-c1c5-408b-b98b-650ea010ba77",
         "type": "separator"
-      },
-      {
-        "id": "35473fb6-94eb-4e8a-95b6-1fcbb3f91075",
-        "type": "custom-command",
-        "color": "brightBlue",
-        "commandPath": "/Users/lucaslacerdacl/Workfolder/heronlabs/ai/code-sessions/src/check-balance.sh"
       }
     ],
     [
@@ -82,6 +76,7 @@
   "compactThreshold": 60,
   "colorLevel": 1,
   "defaultPadding": " ",
+  "defaultPaddingSide": "both",
   "inheritSeparatorColors": false,
   "globalBold": false,
   "gitCacheTtlSeconds": 5,
