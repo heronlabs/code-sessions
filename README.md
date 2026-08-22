@@ -30,6 +30,7 @@ Every `start-s` produces a brand-new session, even if you point it at a folder t
 start-s workloads                             # → workloads-a3f7c2
 start-s workloads                             # → workloads-9d1e4f  (second session, same dir)
 start-s workloads/.worktrees/foo-bar-baz      # → workloads-foo-bar-baz-2c8b71
+start-s                                       # → uses the current directory
 ```
 
 Each session name is `<prefix>-<suffix>`:
@@ -37,11 +38,14 @@ Each session name is `<prefix>-<suffix>`:
 - **Prefix** is derived from the path so you can tell which folder it lives in: lowercased, hidden components (starting with `.`) dropped, remaining components joined with `-` (any `.` inside a non-hidden component also becomes `-`).
 - **Suffix** is six random hex chars from `openssl rand -hex 3`, regenerated every invocation.
 
+With no argument, `start-s` uses the current working directory; the prefix is derived from the path relative to `~/Workfolder` (falling back to `~`, then the full path).
+
 | Input | Example session name |
 |---|---|
 | `start-s workloads` | `workloads-a3f7c2` |
 | `start-s workloads` (run again) | `workloads-9d1e4f` |
 | `start-s workloads/.worktrees/foo-bar-baz` | `workloads-foo-bar-baz-2c8b71` |
+| `start-s` (from `~/Workfolder/workloads`) | `workloads-b4d0e9` |
 
 The launcher prints the generated name on stdout, so you always know which session you're in and what to pass to `resume-s` / `stop-s`.
 
@@ -116,7 +120,7 @@ See the full setup guide for macOS and Ubuntu: **[SETUP.md](SETUP.md)**.
 
 | Command | Description |
 |---|---|
-| `start-s <path>` | Create a fresh tmux session (random name) with Claude inside |
+| `start-s [path]` | Create a fresh tmux session (random name) with Claude inside; defaults to the current directory when no path is given |
 | `resume-s <name>` | Reattach to a session by its literal name |
 | `stop-s <name>` | Kill the session by name |
 | `list-s` | List all running sessions (alias for `tmux ls`) |

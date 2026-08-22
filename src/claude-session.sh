@@ -10,20 +10,21 @@ SCRIPT_DIR="$(cd "$(dirname "$_script")" && pwd)"
 # shellcheck disable=SC1091  # source path resolved dynamically (symlink-safe)
 source "$SCRIPT_DIR/session-name.sh"
 
-if [ -z "$1" ]; then
-  echo "Usage: start-s <folder>"
-  echo "  e.g. start-s workloads"
-  exit 1
-fi
-
 # Build a session name with two parts:
 #   prefix  — derived from the path so you can tell which folder it lives in:
 #             lowercased, hidden components dropped, joined with '-'.
 #   suffix  — six random hex chars so every invocation is unique.
-PREFIX="$(session_prefix "$1")"
+# With an argument the path is resolved under ~/Workfolder; with no
+# argument the caller's current working directory is used instead.
+if [ -n "$1" ]; then
+  PREFIX="$(session_prefix "$1")"
+  WORKDIR="$HOME/Workfolder/${1}"
+else
+  PREFIX="$(session_prefix_from_dir "$PWD")"
+  WORKDIR="$PWD"
+fi
 SUFFIX="$(openssl rand -hex 3)"
 SESSION_NAME="${PREFIX}-${SUFFIX}"
-WORKDIR="$HOME/Workfolder/${1}"
 
 if [ ! -d "$WORKDIR" ]; then
   echo "⚠️  Folder not found: ${WORKDIR}"

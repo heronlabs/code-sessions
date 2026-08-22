@@ -18,9 +18,10 @@ The session script is symlinked from `src/` to `~/`:
 ~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
 ```
 
-Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zshrc`. `start-s` takes a folder path under `~/Workfolder/`; `resume-s` / `stop-s` take a literal session name (read from the tmux status bar or `list-s`). Examples:
+Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zshrc`. `start-s` takes an optional folder path under `~/Workfolder/` (defaults to the current working directory when omitted); `resume-s` / `stop-s` take a literal session name (read from the tmux status bar or `list-s`). Examples:
 
 - `start-s workloads` → runs Claude in `~/Workfolder/workloads`, session like `workloads-a3f7c2`
+- `start-s` (from `~/Workfolder/workloads`) → runs Claude in the current directory, session like `workloads-b4d0e9`
 - `start-s workloads/.worktrees/foo-bar-baz` → runs in that worktree, session like `workloads-foo-bar-baz-2c8b71`
 - `resume-s workloads-a3f7c2` → reattaches to that specific session
 - `stop-s workloads-a3f7c2` → kills that specific session

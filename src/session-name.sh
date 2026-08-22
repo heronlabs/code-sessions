@@ -21,3 +21,17 @@ session_prefix() {
   done
   echo "$prefix"
 }
+
+# session_prefix_from_dir takes an absolute directory and echoes a prefix
+# derived from the path relative to ~/Workfolder (falling back to ~, then
+# the full path), so cwd-based launches match the start-s <folder> naming.
+# Examples (with HOME=/Users/me):
+#   session_prefix_from_dir "/Users/me/Workfolder/workloads"  → "workloads"
+#   session_prefix_from_dir "/Users/me/other/proj"            → "other-proj"
+#   session_prefix_from_dir "/opt/foo"                        → "opt-foo"
+session_prefix_from_dir() {
+  local dir="$1"
+  dir="${dir#"$HOME/Workfolder/"}"
+  dir="${dir#"$HOME/"}"
+  session_prefix "$dir"
+}
