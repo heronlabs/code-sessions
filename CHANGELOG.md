@@ -1,3 +1,9 @@
+## v2.3.8 (2026-08-22)
+
+### Bug Fixes
+
+* fix: remove supera.json configuration file (9ff5e7d40c39c9d7946be58baf797f4da4691a62)
+
 ## v2.3.7 (2026-08-10)
 
 ### Bug Fixes
