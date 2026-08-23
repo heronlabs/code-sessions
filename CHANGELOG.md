@@ -1,3 +1,9 @@
+## v2.4.0 (2026-08-23)
+
+### Features
+
+* feat: start-s defaults to current dir when no path (#28) (0d51a6d58da3ac10b4aabda3c007296dfb46f982)
+
 ## v2.3.8 (2026-08-22)
 
 ### Bug Fixes
