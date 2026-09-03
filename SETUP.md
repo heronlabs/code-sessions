@@ -6,7 +6,7 @@ One guide for **macOS** and **Ubuntu**. Steps that differ are split into two sho
 
 ## 1. Install prerequisites
 
-You need: **tmux**, **zsh**, **Node.js**, **Python 3.10+**, **Claude Code CLI**, **Headroom**, **Tailscale**, and an **SSH server**.
+You need: **tmux**, **zsh**, **Node.js**, **Claude Code CLI**, **Tailscale**, and an **SSH server**.
 
 ### macOS
 
@@ -14,14 +14,11 @@ You need: **tmux**, **zsh**, **Node.js**, **Python 3.10+**, **Claude Code CLI**,
 # Homebrew (skip if installed)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# tmux + node + python
-brew install tmux node python
+# tmux + node
+brew install tmux node
 
 # Claude Code
 npm install -g @anthropic-ai/claude-code
-
-# Headroom (API compression proxy)
-pip install "headroom-ai[all]"
 
 # Tailscale (GUI app)
 brew install --cask tailscale
@@ -35,8 +32,8 @@ Zsh is already the default shell on modern macOS.
 ```bash
 sudo apt update && sudo apt upgrade -y
 
-# tmux + zsh + ssh + python
-sudo apt install -y tmux zsh openssh-server python3 python3-pip
+# tmux + zsh + ssh
+sudo apt install -y tmux zsh openssh-server
 
 # Make zsh the default shell (log out/in afterwards)
 chsh -s "$(which zsh)"
@@ -47,9 +44,6 @@ sudo apt install -y nodejs
 
 # Claude Code
 npm install -g @anthropic-ai/claude-code
-
-# Headroom (API compression proxy)
-pip install "headroom-ai[all]"
 
 # Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
@@ -65,26 +59,9 @@ sudo systemctl enable --now ssh
 
 ---
 
-## 2. Configure API access
+## 2. Sign in to Claude Code
 
-This repo uses DeepSeek models via the Anthropic-compatible API. The settings file at `~/.claude/claude-api-settings.json` (symlinked from the repo's `src/`) tells Claude Code which models and API key to use.
-
-1. Copy the template from the repo and edit your key:
-
-```bash
-cp ~/Workfolder/code-sessions/src/claude-api-settings.json \
-   ~/.claude/claude-api-settings.json
-# Edit the file and replace ANTHROPIC_API_KEY with your actual key
-```
-
-2. Create the symlink so the repo copy stays accessible:
-
-```bash
-ln -sf ~/Workfolder/code-sessions/src/claude-api-settings.json \
-       ~/.claude/claude-api-settings.json
-```
-
-> The `claude-session.sh` script passes `--settings ~/.claude/claude-api-settings.json` to every launched session.
+Run `claude` once in a normal terminal and complete the login. The launcher reuses that login and your `~/.claude/settings.json` (model, status line, etc.); it passes no separate settings file.
 
 ---
 
@@ -166,30 +143,53 @@ source ~/.zshrc
 
 ---
 
-## 8. Verify
+## 8. Status line (optional)
+
+The tmux status bar is off, so [ccstatusline](https://github.com/sirmalloc/ccstatusline) shows repo, branch, model and context inside Claude Code instead. Link its config to the copy versioned in this repo:
+
+```bash
+mkdir -p ~/.config/ccstatusline
+ln -sf ~/Workfolder/code-sessions/ccstatusline/settings.json ~/.config/ccstatusline/settings.json
+```
+
+Then add to `~/.claude/settings.json`:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "npx -y ccstatusline@latest",
+  "padding": 0
+}
+```
+
+---
+
+## 9. Verify
 
 ```bash
 start-s workloads
+# 🚀 Launching new session 'workloads-a3f7c2' in /home/you/Workfolder/workloads...
 ```
 
-You should land in a tmux session with Claude running inside `~/Workfolder/workloads`.
+You should land in a tmux session with Claude running inside `~/Workfolder/workloads`. The session name is printed on launch (the suffix is random); use it with `resume-s` / `stop-s`.
 
 ```bash
 # Detach (keeps Claude running):       Ctrl+B, then D
-resume-s workloads                     # reattach
-stop-s workloads                       # kill the session
+list-s                                 # find the name
+resume-s workloads-a3f7c2              # reattach
+stop-s workloads-a3f7c2                # kill the session
 ```
 
 Try a nested path to confirm the worktree-friendly naming:
 
 ```bash
 mkdir -p ~/Workfolder/workloads/.worktrees/demo
-start-s workloads/.worktrees/demo      # session: workloads-demo
+start-s workloads/.worktrees/demo      # session: workloads-demo-<suffix>
 ```
 
 ---
 
-## 9. Termius (mobile access)
+## 10. Termius (mobile access)
 
 1. Install **Termius** (App Store / Google Play).
 2. New host:
@@ -216,7 +216,7 @@ Import the private key in Termius under **Keychain**.
 | Layer | What it does |
 |---|---|
 | `tmux` | Keeps Claude running detached from any terminal |
-| `headroom` | Compression proxy between Claude and the API (47-92% input token savings) |
+| `ccstatusline` | Status line inside Claude Code (config versioned in this repo) |
 | `CLAUDE.md` | Project-level instructions for Claude when working on this repo |
 | Tailscale | Private network between your devices — no port forwarding |
 | SSH + Termius | Terminal access from your phone to attach to tmux sessions |

@@ -3,7 +3,7 @@
 [![CI](https://github.com/heronlabs/code-sessions/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/heronlabs/code-sessions/actions/workflows/continuous-integration.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-A toolkit for running persistent [Claude Code](https://claude.ai/code) sessions via tmux through the [Headroom](https://github.com/lucaslacerda/headroom) compression proxy with DeepSeek models. Works on **macOS** and **Linux** (tested on Ubuntu).
+A toolkit for running persistent [Claude Code](https://claude.ai/code) sessions via tmux. Works on **macOS** and **Linux** (tested on Ubuntu).
 
 ---
 
@@ -53,7 +53,7 @@ The launcher prints the generated name on stdout, so you always know which sessi
 
 1. A **tmux session** is created with a random unique name.
 2. Per-session tmux options are set: status bar disabled, mouse on, history-limit 10000.
-3. **Claude Code** launches via `headroom wrap` with DeepSeek settings, inside the target folder.
+3. **Claude Code** launches inside the target folder with `--dangerously-skip-permissions`.
 4. When you exit Claude, the pane exits, ending tmux automatically.
 
 ### Remote Access
@@ -76,7 +76,6 @@ Tailscale SSH → Termius → tmux attach -t <session>
 |---|---|
 | `tmux` | Terminal multiplexer for persistent sessions |
 | `claude` | Claude Code CLI (`npm i -g @anthropic-ai/claude-code`) |
-| `headroom` | Compression proxy for Claude API calls |
 | `openssl` | Generating random session name suffixes |
 | Tailscale (optional) | Remote access from other devices |
 
@@ -133,7 +132,7 @@ Add to `~/.zshrc`:
 # Claude session management
 alias start-s="~/.claude-session.sh"
 
-# Resume a session by its literal name (read from tmux status bar or list-s)
+# Resume a session by its literal name (printed by start-s or shown by list-s)
 resume-s() {
   if [ -z "$1" ]; then echo "Usage: resume-s <name>"; return 1; fi
   tmux attach -t "$1"
@@ -175,7 +174,7 @@ stop-s   workloads-9d1e4f       # only stops that one; the others keep running
 | Layer | What it does |
 |---|---|
 | `tmux` | Keeps Claude running detached from any terminal |
-| `headroom` | Compression proxy between Claude and the API (47–92% input token savings) |
+| `ccstatusline` | Claude Code status line; its config lives in this repo (see below) |
 | `CLAUDE.md` | Project-level instructions for Claude when working on this repo |
 | Tailscale | Private network between your devices — no port forwarding needed |
 | SSH + Termius | Terminal access from your phone to attach to tmux sessions |
@@ -192,6 +191,27 @@ tmux set-option -t <name> history-limit 10000
 
 > **All settings are scoped per-session**, so they never interfere with your global tmux config or any other running session.
 
+### Status Line (ccstatusline)
+
+The tmux status bar is off, so [ccstatusline](https://github.com/sirmalloc/ccstatusline) renders session info (repo, branch, model, context) inside Claude Code instead. Its layout is versioned in `ccstatusline/settings.json`; link the live config to it so edits made in the ccstatusline TUI land in the repo:
+
+```bash
+mkdir -p ~/.config/ccstatusline
+ln -sf ~/Workfolder/code-sessions/ccstatusline/settings.json ~/.config/ccstatusline/settings.json
+```
+
+Then point Claude Code at it in `~/.claude/settings.json`:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "npx -y ccstatusline@latest",
+  "padding": 0
+}
+```
+
+To tweak the layout, run `npx ccstatusline@latest` and use its editor; commit the resulting change to `ccstatusline/settings.json`.
+
 ---
 
 ## Architecture
@@ -199,10 +219,13 @@ tmux set-option -t <name> history-limit 10000
 ```
 code-sessions/
 ├── src/
-│   ├── claude-session.sh      # Session launcher (tmux + headroom)
+│   ├── claude-session.sh      # Session launcher (tmux)
 │   └── session-name.sh        # Library for deriving session prefixes from paths
 ├── tests/
-│   └── test-session-name.bats # BATS tests for session name logic
+│   ├── test-claude-session.bats # BATS tests for the launcher (mock tmux/openssl)
+│   └── test-session-name.bats   # BATS tests for session name logic
+├── ccstatusline/
+│   └── settings.json          # ccstatusline layout (symlinked from ~/.config/ccstatusline)
 ├── CLAUDE.md                  # Instructions for Claude Code
 ├── README.md                  # This file
 └── SETUP.md                   # Installation guide (macOS + Ubuntu)
@@ -210,7 +233,7 @@ code-sessions/
 
 ### Session Launcher (`src/claude-session.sh`)
 
-Creates a tmux session, sets per-session options, and launches `headroom wrap claude` in the target directory. The pane exits when Claude exits, cleaning up the tmux session automatically.
+Creates a tmux session, sets per-session options, and launches `claude` in the target directory. The pane exits when Claude exits, cleaning up the tmux session automatically.
 
 ### Prefix Library (`src/session-name.sh`)
 

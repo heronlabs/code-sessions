@@ -4,11 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-A toolkit for running persistent Claude Code sessions via tmux through the Headroom proxy. The script handles session lifecycle (start/resume/stop).
+A toolkit for running persistent Claude Code sessions via tmux. The script handles session lifecycle (start/resume/stop).
 
 ## Repository Structure
 
 - `src/claude-session.sh` — Session launcher. Creates a tmux session, runs `claude` interactively in the target folder, and exits the pane (and session) when Claude exits.
+- `src/session-name.sh` — Library that derives the session prefix from a path; sourced by the launcher.
+- `tests/*.bats` — BATS tests for the launcher (mock tmux/openssl) and the prefix library. Run with `make test`; lint with `make lint`.
+- `ccstatusline/settings.json` — ccstatusline layout, symlinked from `~/.config/ccstatusline/settings.json` so TUI edits are versioned here.
 - `README.md` — Workflow overview and setup guide links.
 
 ## Setup
@@ -18,7 +21,7 @@ The session script is symlinked from `src/` to `~/`:
 ~/.claude-session.sh  ->  ~/Workfolder/code-sessions/src/claude-session.sh
 ```
 
-Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zshrc`. `start-s` takes an optional folder path under `~/Workfolder/` (defaults to the current working directory when omitted); `resume-s` / `stop-s` take a literal session name (read from the tmux status bar or `list-s`). Examples:
+Shell aliases (`start-s`, `resume-s`, `stop-s`, `list-s`) are defined in `~/.zshrc`. `start-s` takes an optional folder path under `~/Workfolder/` (defaults to the current working directory when omitted); `resume-s` / `stop-s` take a literal session name (printed by `start-s` or shown by `list-s`). Examples:
 
 - `start-s workloads` → runs Claude in `~/Workfolder/workloads`, session like `workloads-a3f7c2`
 - `start-s` (from `~/Workfolder/workloads`) → runs Claude in the current directory, session like `workloads-b4d0e9`
