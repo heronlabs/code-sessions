@@ -97,7 +97,7 @@ Your SSH address from any device will look like `your-hostname.tail12345.ts.net`
 ```bash
 mkdir -p ~/Workfolder
 cd ~/Workfolder
-git clone https://github.com/lucaslacerdacl/code-sessions.git
+git clone https://github.com/heronlabs/code-sessions.git
 
 # Create a working folder (this is what you'll pass to start-s)
 mkdir -p ~/Workfolder/workloads
