@@ -1,3 +1,9 @@
+## v2.4.1 (2026-09-03)
+
+### Bug Fixes
+
+* fix: drop stale DeepSeek settings flag, remove check-balance, sync docs with ccstatusline (e12a87826117e3da77b4e042d7632821d97fa589)
+
 ## v2.4.0 (2026-08-23)
 
 ### Features
