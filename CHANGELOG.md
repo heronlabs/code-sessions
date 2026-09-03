@@ -1,3 +1,9 @@
+## v2.4.2 (2026-09-03)
+
+### Documentation
+
+* docs: point clone URL at heronlabs/code-sessions (da02e8e62d1a3cbf1c79f48a341d30d0a067ca98)
+
 ## v2.4.1 (2026-09-03)
 
 ### Bug Fixes
