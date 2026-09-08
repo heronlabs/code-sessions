@@ -1,3 +1,10 @@
+## v2.4.3 (2026-09-08)
+
+### Miscellaneous Chores
+
+* other: Merge remote-tracking branch 'origin' (c9134cdf9f0454de140fa2c6269ffea6d88b4c3e)
+* other: update (d99ffe8d2254322fe143a302f09e654f961a7d82)
+
 ## v2.4.2 (2026-09-03)
 
 ### Documentation
