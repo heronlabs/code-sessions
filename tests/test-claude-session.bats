@@ -87,3 +87,25 @@ teardown() {
   [ "$status" -ne 0 ]
   echo "$output" | grep -q "Folder not found"
 }
+
+# ---------------------------------------------------------------------------
+# Second argument: initial prompt fed to claude (e.g. unattended launches)
+# ---------------------------------------------------------------------------
+
+@test "second argument is passed as claude's initial prompt" {
+  run "$CLAUDE_SESSION" workloads /start
+  [ "$status" -eq 0 ]
+  grep -qF "claude --dangerously-skip-permissions /start; exit" "$TMUX_LOG"
+}
+
+@test "no second argument launches claude with no initial prompt" {
+  run "$CLAUDE_SESSION" workloads
+  [ "$status" -eq 0 ]
+  grep -qF "claude --dangerously-skip-permissions; exit" "$TMUX_LOG"
+}
+
+@test "second argument with spaces is safely quoted" {
+  run "$CLAUDE_SESSION" workloads "/start sonhandoape"
+  [ "$status" -eq 0 ]
+  grep -qF "claude --dangerously-skip-permissions /start\\ sonhandoape; exit" "$TMUX_LOG"
+}

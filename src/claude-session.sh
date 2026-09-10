@@ -39,8 +39,15 @@ tmux set-option -t "$SESSION_NAME" history-limit 10000
 
 tmux set-option -t "$SESSION_NAME" status off
 
-# Launch Claude; exit the pane (and session) when claude exits
-tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions; exit" Enter
+# Launch Claude; exit the pane (and session) when claude exits.
+# With a second argument, pass it as Claude's initial prompt (e.g. a
+# slash command like "/start") so unattended launches (systemd/cron)
+# don't just sit idle waiting for input.
+if [ -n "$2" ]; then
+  tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions $(printf '%q' "$2"); exit" Enter
+else
+  tmux send-keys -t "${SESSION_NAME}.0" "cd '${WORKDIR}' && claude --dangerously-skip-permissions; exit" Enter
+fi
 
 # Only attach when running in an interactive terminal (not from systemd/cron)
 if [ -t 0 ]; then
