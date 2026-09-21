@@ -1,3 +1,9 @@
+## v2.4.4 (2026-09-21)
+
+### Bug Fixes
+
+* fix: update settings.json with new IDs and colors for git elements (7a92241ae9918f3d4e14ffe39af09891526b6aa0)
+
 ## v2.4.3 (2026-09-08)
 
 ### Miscellaneous Chores
